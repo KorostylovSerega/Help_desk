@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from helpdesk.models import CustomUser, Ticket
+
+admin.site.register(CustomUser)
+admin.site.register(Ticket)
