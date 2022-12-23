@@ -1,9 +1,8 @@
 {% extends 'helpdesk/base.html' %}
 
 {% block content %}
-    {% if not user.is_authenticated %}
-        ты должен зарегаться!!!
-    {% else %}
-        Привет!!!
-    {% endif %}
+    {% for ticket in object_list %}
+        {{ ticket.title }}
+        <br>
+    {% endfor %}
 {% endblock %}

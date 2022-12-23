@@ -16,8 +16,8 @@ class UserCreateForm(UserCreationForm):
         }
 
 
-class TicketCreateForm(forms.ModelForm):
-
-    class Meta:
-        model = Ticket
-        fields = ['title', 'description', 'priority']
+# class TicketCreateForm(forms.ModelForm):
+#
+#     class Meta:
+#         model = Ticket
+#         fields = ['title', 'description', 'priority']
