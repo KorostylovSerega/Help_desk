@@ -1,9 +1,9 @@
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView, ListView, DetailView
 
-from helpdesk.forms import UserCreateForm
+from helpdesk.forms import UserCreateForm, CommentCreateForm
 from helpdesk.models import CustomUser, Ticket
 
 
@@ -26,7 +26,7 @@ class TicketCreateView(LoginRequiredMixin, CreateView):
     login_url = reverse_lazy('login')
     model = Ticket
     fields = ['title', 'description', 'priority']
-    template_name = 'helpdesk/create_ticket.html'
+    template_name = 'helpdesk/ticket_create.html'
     success_url = reverse_lazy('home')
 
     def form_valid(self, form):
@@ -49,3 +49,25 @@ class TicketListView(LoginRequiredMixin, ListView):
         if not user.is_superuser:
             return queryset.filter(user=user)
         return queryset
+
+
+class TicketDetailView(LoginRequiredMixin, DetailView):
+    login_url = reverse_lazy('login')
+    model = Ticket
+    template_name = 'helpdesk/ticket_detail.html'
+    extra_context = {'form': CommentCreateForm}
+
+
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    login_url = reverse_lazy('login')
+    form_class = CommentCreateForm
+
+    def form_valid(self, form):
+        comment = form.save(commit=False)
+        ticket_id = self.kwargs.get('pk')
+        ticket = Ticket.objects.get(id=ticket_id)
+        author = self.request.user
+        comment.ticket = ticket
+        comment.author = author
+        comment.save()
+        return super().form_valid(form)

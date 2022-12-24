@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 
-from helpdesk.models import CustomUser, Ticket
+from helpdesk.models import CustomUser, Comment
 
 
 class UserCreateForm(UserCreationForm):
@@ -16,8 +16,7 @@ class UserCreateForm(UserCreationForm):
         }
 
 
-# class TicketCreateForm(forms.ModelForm):
-#
-#     class Meta:
-#         model = Ticket
-#         fields = ['title', 'description', 'priority']
+class CommentCreateForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['body']

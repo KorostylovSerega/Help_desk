@@ -1,0 +1,27 @@
+{% extends 'helpdesk/base.html' %}
+
+{% block content %}
+    id: {{ ticket.id }}
+    <br>
+    title: {{ ticket.title }}
+    <br>
+    description: {{ ticket.description }}
+    <br>
+    comments:
+    {% for comment in ticket.comments.all%}
+        <br>
+        {{ comment.author }}
+        <br>
+        {{ comment }}
+        <br>
+        {{ comment.created }}
+        <br>
+    {% endfor %}
+    {% if ticket.status == 1 %}
+        <form action="{% url 'add_comment' ticket.id %}" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" ><span>Send</span></button>
+        </form>
+    {% endif %}
+{% endblock %}

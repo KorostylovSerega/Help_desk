@@ -62,7 +62,7 @@ class Comment(models.Model):
         (RESTORE_TOPIC, 'Restore'),
     ]
 
-    user = models.ForeignKey(CustomUser, related_name='comments', on_delete=models.CASCADE)
+    author = models.ForeignKey(CustomUser, related_name='comments', on_delete=models.CASCADE)
     ticket = models.ForeignKey(Ticket, related_name='comments', on_delete=models.CASCADE)
     topic = models.PositiveSmallIntegerField(choices=TOPIC_CHOICES, default=DISCUSSION_TOPIC)
     body = models.TextField()
