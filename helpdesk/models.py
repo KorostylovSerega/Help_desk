@@ -49,3 +49,29 @@ class Ticket(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Comment(models.Model):
+    DISCUSSION_TOPIC = 1
+    REJECT_TOPIC = 2
+    RESTORE_TOPIC = 3
+
+    TOPIC_CHOICES = [
+        (DISCUSSION_TOPIC, 'Discussion'),
+        (REJECT_TOPIC, 'Reject'),
+        (RESTORE_TOPIC, 'Restore'),
+    ]
+
+    user = models.ForeignKey(CustomUser, related_name='comments', on_delete=models.CASCADE)
+    ticket = models.ForeignKey(Ticket, related_name='comments', on_delete=models.CASCADE)
+    topic = models.PositiveSmallIntegerField(choices=TOPIC_CHOICES, default=DISCUSSION_TOPIC)
+    body = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['ticket', 'created']
+        verbose_name = 'comment'
+        verbose_name_plural = 'comments'
+
+    def __str__(self):
+        return self.body

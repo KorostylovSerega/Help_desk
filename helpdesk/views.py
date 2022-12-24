@@ -37,7 +37,8 @@ class TicketCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class TicketListView(ListView):
+class TicketListView(LoginRequiredMixin, ListView):
+    login_url = reverse_lazy('login')
     model = Ticket
     template_name = 'helpdesk/home.html'
     queryset = Ticket.objects.all()
@@ -45,6 +46,6 @@ class TicketListView(ListView):
     def get_queryset(self):
         queryset = super().get_queryset()
         user = self.request.user
-        if user.is_superuser:
-            return queryset
-        return queryset.filter(user=user)
+        if not user.is_superuser:
+            return queryset.filter(user=user)
+        return queryset
