@@ -1,8 +1,15 @@
 {% extends 'helpdesk/base.html' %}
 
 {% block content %}
+    <a href="{% url 'add_ticket' %}">Add new ticket</a>
+    <br>
+    <ul>
     {% for ticket in object_list %}
-        {{ ticket.title }}
-        <br>
+        <li>
+            <p>{{ ticket.title }}</p>
+            <p>{{ ticket.get_status_display }}</p>
+            <p><a href="{% url 'detail_ticket' ticket.id %}">Detail</a></p>
+        </li>
     {% endfor %}
+    </ul>
 {% endblock %}

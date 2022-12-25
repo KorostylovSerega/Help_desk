@@ -1,27 +1,47 @@
 {% extends 'helpdesk/base.html' %}
 
 {% block content %}
+    <a href="{% url 'update_ticket' ticket.id %}">Update</a>
+    <br>
     id: {{ ticket.id }}
     <br>
     title: {{ ticket.title }}
     <br>
     description: {{ ticket.description }}
     <br>
+    priority: {{ ticket.get_priority_display }}
+    <br>
     comments:
     {% for comment in ticket.comments.all%}
-        <br>
-        {{ comment.author }}
+        <ul>
+            <li>{{ comment.author }}</li>
         <br>
         {{ comment }}
         <br>
         {{ comment.created }}
-        <br>
+        </ul>
     {% endfor %}
-    {% if ticket.status == 1 %}
-        <form action="{% url 'add_comment' ticket.id %}" method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" ><span>Send</span></button>
-        </form>
+{#    {% if comment_form %}#}
+    <form action="{% url 'add_comment' ticket.id %}" method="post">
+        {% csrf_token %}
+        {{ comment_form.as_p }}
+        <button type="submit" ><span>Post</span></button>
+    </form>
+{#    {% endif %}#}
+    <a href="{% url 'change_status' ticket.id 2 %}">Accept</a>
+    <a href="{% url 'change_status' ticket.id 3 %}">Reject</a>
+    {% if status_form %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ status_form.as_p }}
+        <button type="submit" ><span>Confirm</span></button>
+    </form>
+    {% endif %}
+        {% if form %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" ><span>Confirm</span></button>
+    </form>
     {% endif %}
 {% endblock %}
