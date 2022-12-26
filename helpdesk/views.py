@@ -49,9 +49,11 @@ class TicketUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy('detail_ticket', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):
-        if self.object.status != 1:
-            return HttpResponseRedirect(self.get_success_url())
-        return super().form_valid(form)
+        ticket_author = self.object.user
+        ticket_status = self.object.status
+        if ticket_status == Ticket.ACTIVE_STATUS and ticket_author == self.request.user:
+            return super().form_valid(form)
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class TicketListView(LoginRequiredMixin, ListView):
@@ -75,13 +77,14 @@ class TicketDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.object.status == 1:
+        if self.object.status == Ticket.ACTIVE_STATUS:
             context['comment_form'] = CommentCreateForm()
+
             context['reject_form'] = ChangeStatusForm(initial={
-                'status': 3
+                'status': Ticket.REJECTED_STATUS
             })
             accept_form = ChangeStatusForm(initial={
-                'status': 2
+                'status': Ticket.PROCESSED_STATUS
             })
             accept_form.fields['comment'].widget = forms.HiddenInput()
             context['accept_form'] = accept_form
