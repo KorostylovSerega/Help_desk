@@ -1,7 +1,8 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
+from django.forms import Textarea, HiddenInput
 
-from helpdesk.models import CustomUser, Comment
+from helpdesk.models import CustomUser, Ticket, Comment
 
 
 class UserCreateForm(UserCreationForm):
@@ -20,3 +21,14 @@ class CommentCreateForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ['body']
+
+
+class ChangeStatusForm(forms.ModelForm):
+    comment = forms.CharField(required=False, widget=forms.Textarea)
+
+    class Meta:
+        model = Ticket
+        fields = ['status']
+        widgets = {
+            'status': HiddenInput(),
+        }

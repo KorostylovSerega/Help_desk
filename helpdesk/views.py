@@ -1,10 +1,11 @@
+from django import forms
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
 
-from helpdesk.forms import UserCreateForm, CommentCreateForm
+from helpdesk.forms import UserCreateForm, ChangeStatusForm, CommentCreateForm
 from helpdesk.models import CustomUser, Ticket
 
 
@@ -76,30 +77,27 @@ class TicketDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         if self.object.status == 1:
             context['comment_form'] = CommentCreateForm()
+            context['reject_form'] = ChangeStatusForm(initial={
+                'status': 3
+            })
+            accept_form = ChangeStatusForm(initial={
+                'status': 2
+            })
+            accept_form.fields['comment'].widget = forms.HiddenInput()
+            context['accept_form'] = accept_form
         return context
 
 
 class ChangeTicketStatusView(LoginRequiredMixin, UpdateView):
     login_url = reverse_lazy('login')
     model = Ticket
-    fields = ['status']
-    template_name = 'helpdesk/ticket_detail.html'
+    form_class = ChangeStatusForm
 
     def get_success_url(self):
         return reverse_lazy('detail_ticket', kwargs={'pk': self.object.pk})
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        current_status = self.object.status
-        changed_status = self.kwargs.get('status')
-        if current_status in [1, 3] and changed_status in [2, 3, 4]:
-            context['status_form'] = CommentCreateForm()
-        return context
-
     # def form_valid(self, form):
-    #     if self.object.status != 1:
-    #         return HttpResponseRedirect(self.get_success_url())
-    #     return super().form_valid(form)
+    #     pass
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):

@@ -11,6 +11,8 @@
     <br>
     priority: {{ ticket.get_priority_display }}
     <br>
+    status: {{ ticket.get_status_display }}
+    <br>
     comments:
     {% for comment in ticket.comments.all%}
         <ul>
@@ -21,27 +23,25 @@
         {{ comment.created }}
         </ul>
     {% endfor %}
-{#    {% if comment_form %}#}
+    {% if comment_form %}
     <form action="{% url 'add_comment' ticket.id %}" method="post">
         {% csrf_token %}
         {{ comment_form.as_p }}
         <button type="submit" ><span>Post</span></button>
     </form>
-{#    {% endif %}#}
-    <a href="{% url 'change_status' ticket.id 2 %}">Accept</a>
-    <a href="{% url 'change_status' ticket.id 3 %}">Reject</a>
-    {% if status_form %}
-    <form action="" method="post">
+    {% endif %}
+    {% if reject_form %}
+    <form action="{% url 'change_status' ticket.id %}" method="post">
         {% csrf_token %}
-        {{ status_form.as_p }}
-        <button type="submit" ><span>Confirm</span></button>
+        {{ reject_form.as_p }}
+        <button type="submit" ><span>Reject</span></button>
     </form>
     {% endif %}
-        {% if form %}
-    <form action="" method="post">
+    {% if accept_form %}
+    <form action="{% url 'change_status' ticket.id %}" method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" ><span>Confirm</span></button>
+        {{ accept_form.as_p }}
+        <button type="submit" ><span>Accept</span></button>
     </form>
     {% endif %}
 {% endblock %}
