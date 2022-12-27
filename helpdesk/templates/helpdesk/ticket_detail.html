@@ -1,6 +1,7 @@
 {% extends 'helpdesk/base.html' %}
 
 {% block content %}
+
     <a href="{% url 'update_ticket' ticket.id %}">Update</a>
     <br>
     id: {{ ticket.id }}
@@ -23,13 +24,15 @@
         {{ comment.created }}
         </ul>
     {% endfor %}
+
     {% if comment_form %}
     <form action="{% url 'add_comment' ticket.id %}" method="post">
         {% csrf_token %}
         {{ comment_form.as_p }}
-        <button type="submit" ><span>Post</span></button>
+        <button type="submit" ><span>Post comment</span></button>
     </form>
     {% endif %}
+
     {% if reject_form %}
     <form action="{% url 'change_status' ticket.id %}" method="post">
         {% csrf_token %}
@@ -37,6 +40,7 @@
         <button type="submit" ><span>Reject</span></button>
     </form>
     {% endif %}
+
     {% if accept_form %}
     <form action="{% url 'change_status' ticket.id %}" method="post">
         {% csrf_token %}
@@ -44,4 +48,21 @@
         <button type="submit" ><span>Accept</span></button>
     </form>
     {% endif %}
+
+    {% if complete_form %}
+    <form action="{% url 'change_status' ticket.id %}" method="post">
+        {% csrf_token %}
+        {{ complete_form.as_p }}
+        <button type="submit" ><span>Completed</span></button>
+    </form>
+    {% endif %}
+
+    {% if restore_form %}
+    <form action="{% url 'change_status' ticket.id %}" method="post">
+        {% csrf_token %}
+        {{ restore_form.as_p }}
+        <button type="submit" ><span>Restore</span></button>
+    </form>
+    {% endif %}
+
 {% endblock %}

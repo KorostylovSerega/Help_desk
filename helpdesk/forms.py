@@ -1,6 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
-from django.forms import Textarea, HiddenInput
+from django.forms import HiddenInput
 
 from helpdesk.models import CustomUser, Ticket, Comment
 

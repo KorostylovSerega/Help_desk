@@ -1,12 +1,13 @@
 from django import forms
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
 
 from helpdesk.forms import UserCreateForm, ChangeStatusForm, CommentCreateForm
-from helpdesk.models import CustomUser, Ticket
+from helpdesk.models import CustomUser, Ticket, Comment
 
 
 class UserCreateView(CreateView):
@@ -74,20 +75,39 @@ class TicketDetailView(LoginRequiredMixin, DetailView):
     login_url = reverse_lazy('login')
     model = Ticket
     template_name = 'helpdesk/ticket_detail.html'
+    comment_form = CommentCreateForm
+    accept_form = ChangeStatusForm(initial={'status': Ticket.PROCESSED_STATUS})
+    reject_form = ChangeStatusForm(initial={'status': Ticket.REJECTED_STATUS})
+    complete_form = ChangeStatusForm(initial={'status': Ticket.COMPLETED_STATUS})
+    restore_form = ChangeStatusForm(initial={'status': Ticket.RESTORED_STATUS})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.object.status == Ticket.ACTIVE_STATUS:
-            context['comment_form'] = CommentCreateForm()
+        ticket_status = self.object.status
+        user_is_admin = self.request.user.is_staff
 
-            context['reject_form'] = ChangeStatusForm(initial={
-                'status': Ticket.REJECTED_STATUS
-            })
-            accept_form = ChangeStatusForm(initial={
-                'status': Ticket.PROCESSED_STATUS
-            })
-            accept_form.fields['comment'].widget = forms.HiddenInput()
-            context['accept_form'] = accept_form
+        if ticket_status == Ticket.ACTIVE_STATUS:
+            context['comment_form'] = self.comment_form
+
+        if ticket_status in [Ticket.ACTIVE_STATUS, Ticket.RESTORED_STATUS] and user_is_admin:
+            self.accept_form.fields['comment'].widget = forms.HiddenInput()
+            context['accept_form'] = self.accept_form
+
+            reject_form = self.reject_form
+
+            if ticket_status == Ticket.ACTIVE_STATUS:
+                reject_form.fields['comment'].required = True
+                context['reject_form'] = reject_form
+            elif ticket_status == Ticket.RESTORED_STATUS:
+                reject_form.fields['comment'].widget = forms.HiddenInput()
+                context['reject_form'] = reject_form
+
+        if ticket_status == Ticket.PROCESSED_STATUS and user_is_admin:
+            self.complete_form.fields['comment'].widget = forms.HiddenInput()
+            context['complete_form'] = self.complete_form
+
+        if ticket_status == Ticket.REJECTED_STATUS and not user_is_admin:
+            context['restore_form'] = self.restore_form
         return context
 
 
@@ -95,12 +115,40 @@ class ChangeTicketStatusView(LoginRequiredMixin, UpdateView):
     login_url = reverse_lazy('login')
     model = Ticket
     form_class = ChangeStatusForm
-
-    def get_success_url(self):
-        return reverse_lazy('detail_ticket', kwargs={'pk': self.object.pk})
+    success_url = reverse_lazy('home')
 
     def form_valid(self, form):
-        return super().form_valid(form)
+        ticket = Ticket.objects.get(id=self.object.pk)
+        current_status = ticket.status
+        changed_status = form.cleaned_data.get('status')
+        comment = form.cleaned_data.get('comment')
+        if changed_status in [Ticket.PROCESSED_STATUS, Ticket.COMPLETED_STATUS]:
+            return super().form_valid(form)
+        if changed_status == Ticket.RESTORED_STATUS:
+            if not comment:
+                return super().form_valid(form)
+
+            with transaction.atomic():
+                self.object.save()
+                Comment.objects.create(author=self.request.user,
+                                       ticket=self.object,
+                                       topic=Comment.RESTORE_TOPIC,
+                                       body=comment)
+            return HttpResponseRedirect(self.get_success_url())
+
+        if changed_status == Ticket.REJECTED_STATUS:
+            if current_status == Ticket.ACTIVE_STATUS:
+
+                with transaction.atomic():
+                    form.save()
+                    Comment.objects.create(author=self.request.user,
+                                           ticket=self.object,
+                                           topic=Comment.REJECT_TOPIC,
+                                           body=comment)
+                return HttpResponseRedirect(self.get_success_url())
+
+        self.object.delete()
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
@@ -118,4 +166,4 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('detail_ticket', kwargs={'pk': self.object.ticket.id})
+        return reverse_lazy('detail_ticket', kwargs={'pk': self.object.ticket_id})
