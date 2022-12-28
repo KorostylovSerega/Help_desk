@@ -32,3 +32,10 @@ class ChangeStatusForm(forms.ModelForm):
         widgets = {
             'status': HiddenInput(),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        changed_status = cleaned_data.get('status')
+        if self.instance.status != changed_status:
+            self.add_error('status', 'test error')
+        return cleaned_data

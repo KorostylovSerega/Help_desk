@@ -150,6 +150,13 @@ class ChangeTicketStatusView(LoginRequiredMixin, UpdateView):
         self.object.delete()
         return HttpResponseRedirect(self.get_success_url())
 
+    def form_invalid(self, form):
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        # a = self.object
+        return reverse_lazy('detail_ticket', kwargs={'pk': self.object.pk})
+
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
     login_url = reverse_lazy('login')
