@@ -35,6 +35,8 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'helpdesk.middlewares.AutoLogout',
+    'helpdesk.middlewares.CounterUserAction',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -116,3 +118,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+INACTIVITY_TIME_LIMIT = 60 * 60
