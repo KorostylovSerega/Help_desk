@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
 
-from helpdesk.forms import UserCreateForm, ChangeStatusForm, CommentCreateForm
+from helpdesk.forms import UserCreateForm, ChangeTicketStatusForm, CommentCreateForm
 from helpdesk.models import CustomUser, Ticket, Comment
 
 
@@ -76,10 +76,10 @@ class TicketDetailView(LoginRequiredMixin, DetailView):
     model = Ticket
     template_name = 'helpdesk/ticket_detail.html'
     comment_form = CommentCreateForm
-    accept_form = ChangeStatusForm(initial={'status': Ticket.PROCESSED_STATUS})
-    reject_form = ChangeStatusForm(initial={'status': Ticket.REJECTED_STATUS})
-    complete_form = ChangeStatusForm(initial={'status': Ticket.COMPLETED_STATUS})
-    restore_form = ChangeStatusForm(initial={'status': Ticket.RESTORED_STATUS})
+    accept_form = ChangeTicketStatusForm(initial={'status': Ticket.PROCESSED_STATUS})
+    reject_form = ChangeTicketStatusForm(initial={'status': Ticket.REJECTED_STATUS})
+    complete_form = ChangeTicketStatusForm(initial={'status': Ticket.COMPLETED_STATUS})
+    restore_form = ChangeTicketStatusForm(initial={'status': Ticket.RESTORED_STATUS})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -114,7 +114,7 @@ class TicketDetailView(LoginRequiredMixin, DetailView):
 class ChangeTicketStatusView(LoginRequiredMixin, UpdateView):
     login_url = reverse_lazy('login')
     model = Ticket
-    form_class = ChangeStatusForm
+    form_class = ChangeTicketStatusForm
     success_url = reverse_lazy('home')
 
     def form_valid(self, form):
@@ -134,7 +134,7 @@ class ChangeTicketStatusView(LoginRequiredMixin, UpdateView):
                                        ticket=self.object,
                                        topic=Comment.RESTORE_TOPIC,
                                        body=comment)
-            return HttpResponseRedirect(self.get_success_url())
+            return HttpResponseRedirect(self.success_url)
 
         if changed_status == Ticket.REJECTED_STATUS:
             if current_status == Ticket.ACTIVE_STATUS:
@@ -145,17 +145,19 @@ class ChangeTicketStatusView(LoginRequiredMixin, UpdateView):
                                            ticket=self.object,
                                            topic=Comment.REJECT_TOPIC,
                                            body=comment)
-                return HttpResponseRedirect(self.get_success_url())
+                return HttpResponseRedirect(self.success_url)
 
         self.object.delete()
-        return HttpResponseRedirect(self.get_success_url())
+        return HttpResponseRedirect(self.success_url)
 
     def form_invalid(self, form):
-        return HttpResponseRedirect(self.get_success_url())
+        a = form.errors['status']
+        return HttpResponseRedirect(reverse_lazy('detail_ticket', kwargs={'pk': self.object.pk}))
 
-    def get_success_url(self):
-        # a = self.object
-        return reverse_lazy('detail_ticket', kwargs={'pk': self.object.pk})
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):

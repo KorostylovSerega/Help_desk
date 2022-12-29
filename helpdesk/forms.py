@@ -23,7 +23,7 @@ class CommentCreateForm(forms.ModelForm):
         fields = ['body']
 
 
-class ChangeStatusForm(forms.ModelForm):
+class ChangeTicketStatusForm(forms.ModelForm):
     comment = forms.CharField(required=False, widget=forms.Textarea)
 
     class Meta:
@@ -33,9 +33,15 @@ class ChangeStatusForm(forms.ModelForm):
             'status': HiddenInput(),
         }
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+
     def clean(self):
         cleaned_data = super().clean()
+        author = self.instance.user
         changed_status = cleaned_data.get('status')
+        current_status = self.instance.status
         if self.instance.status != changed_status:
             self.add_error('status', 'test error')
         return cleaned_data
