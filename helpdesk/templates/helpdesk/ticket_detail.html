@@ -17,7 +17,7 @@
     comments:
     {% for comment in ticket.comments.all%}
         <ul>
-            <li>{{ comment.author }}</li>
+            <li>{{ comment.author.get_full_name }}</li>
         <br>
         {{ comment }}
         <br>

@@ -5,6 +5,7 @@ from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
+from django.contrib import messages
 
 from helpdesk.forms import UserCreateForm, ChangeTicketStatusForm, CommentCreateForm
 from helpdesk.models import CustomUser, Ticket, Comment
@@ -151,8 +152,10 @@ class ChangeTicketStatusView(LoginRequiredMixin, UpdateView):
         return HttpResponseRedirect(self.success_url)
 
     def form_invalid(self, form):
-        a = form.errors['status']
-        return HttpResponseRedirect(reverse_lazy('detail_ticket', kwargs={'pk': self.object.pk}))
+        error_list = form.errors.get('status')
+        for error in error_list:
+            messages.error(self.request, error)
+        return HttpResponseRedirect(self.success_url)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
