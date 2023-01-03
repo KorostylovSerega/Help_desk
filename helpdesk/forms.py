@@ -18,6 +18,7 @@ class UserCreateForm(UserCreationForm):
 
 
 class CommentCreateForm(forms.ModelForm):
+
     class Meta:
         model = Comment
         fields = ['body']

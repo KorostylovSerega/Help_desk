@@ -1,12 +1,13 @@
 from django import forms
 from django.contrib.auth import login, authenticate
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
 from django.contrib import messages
 
+from helpdesk.filters import TicketFilter
 from helpdesk.forms import UserCreateForm, ChangeTicketStatusForm, CommentCreateForm
 from helpdesk.models import CustomUser, Ticket, Comment
 
@@ -62,14 +63,34 @@ class TicketListView(LoginRequiredMixin, ListView):
     login_url = reverse_lazy('login')
     model = Ticket
     template_name = 'helpdesk/home.html'
-    queryset = Ticket.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter'] = TicketFilter(self.request.GET, queryset=self.get_queryset())
+        return context
 
     def get_queryset(self):
         queryset = super().get_queryset()
         user = self.request.user
         if not user.is_superuser:
-            return queryset.filter(user=user)
-        return queryset
+            return queryset.filter(user=user).exclude(status=Ticket.REJECTED_STATUS)
+        return queryset.exclude(status=Ticket.RESTORED_STATUS)
+
+
+class RejectTicketListView(ListView):
+    model = Ticket
+    template_name = 'helpdesk/ticket_reject.html'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        return queryset.filter(user=user, status=Ticket.REJECTED_STATUS)
+
+
+class RestoreTicketListView(ListView):
+    model = Ticket
+    queryset = Ticket.objects.filter(status=Ticket.RESTORED_STATUS)
+    template_name = 'helpdesk/ticket_restore.html'
 
 
 class TicketDetailView(LoginRequiredMixin, DetailView):

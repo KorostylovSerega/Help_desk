@@ -1,9 +1,10 @@
 {% extends 'helpdesk/base.html' %}
-
+{% block title %}Ticket detail{% endblock %}
 {% block content %}
-
+    {% if not user.is_staff and ticket.status == 1 %}
     <a href="{% url 'update_ticket' ticket.id %}">Update</a>
     <br>
+    {% endif %}
     id: {{ ticket.id }}
     <br>
     title: {{ ticket.title }}
