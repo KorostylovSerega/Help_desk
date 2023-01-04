@@ -48,13 +48,6 @@ class TicketUpdateView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('detail_ticket', kwargs={'pk': self.object.pk})
 
-    def form_valid(self, form):
-        ticket_author = self.object.user
-        ticket_status = self.object.status
-        if ticket_status == Ticket.ACTIVE_STATUS and ticket_author == self.request.user:
-            return super().form_valid(form)
-        return HttpResponseRedirect(self.get_success_url())
-
     def form_invalid(self, form):
         error_list = form.errors.get('__all__')
         for error in error_list:
