@@ -23,6 +23,46 @@ class CommentCreateForm(forms.ModelForm):
         model = Comment
         fields = ['body']
 
+    def __init__(self, *args, **kwargs):
+        self.ticket = kwargs.pop('ticket', None)
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        super().clean()
+        current_status = self.ticket.status
+        ticket_author = self.ticket.user
+        comment_author = self.request.user
+
+        if current_status != Ticket.ACTIVE_STATUS:
+            self.add_error(None, 'You cannot comment on an ticket that is not in the active status')
+
+        if ticket_author != comment_author and not comment_author.is_staff:
+            self.add_error(None, 'Only the author or administrator can leave a comment on the ticket')
+
+
+class TicketUpdateForm(forms.ModelForm):
+
+    class Meta:
+        model = Ticket
+        fields = ['description', 'priority']
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        super().clean()
+        current_status = self.instance.status
+        author = self.instance.user
+        user = self.request.user
+
+        if current_status != Ticket.ACTIVE_STATUS:
+            self.add_error(None, 'You cannot edit an ticket if it is not in the Active status')
+
+        if author != user:
+            self.add_error(None, 'You can change only your ticket')
+
 
 class ChangeTicketStatusForm(forms.ModelForm):
     comment = forms.CharField(required=False, widget=forms.Textarea)
@@ -67,5 +107,3 @@ class ChangeTicketStatusForm(forms.ModelForm):
         if changed_status == Ticket.COMPLETED_STATUS and \
                 current_status != Ticket.PROCESSED_STATUS and not user_is_admin:
             self.add_error('status', 'You can complete the ticket only if it in the status PROCESSED')
-
-        return cleaned_data

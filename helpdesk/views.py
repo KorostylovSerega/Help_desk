@@ -8,13 +8,12 @@ from django.views.generic import CreateView, ListView, DetailView, UpdateView
 from django.contrib import messages
 
 from helpdesk.filters import TicketFilter
-from helpdesk.forms import UserCreateForm, ChangeTicketStatusForm, CommentCreateForm
-from helpdesk.models import CustomUser, Ticket, Comment
+from helpdesk.forms import UserCreateForm, ChangeTicketStatusForm, CommentCreateForm, TicketUpdateForm
+from helpdesk.models import Ticket, Comment
 
 
 class UserCreateView(CreateView):
     form_class = UserCreateForm
-    model = CustomUser
     template_name = 'registration/registration.html'
     success_url = reverse_lazy('home')
 
@@ -28,7 +27,6 @@ class UserCreateView(CreateView):
 
 
 class TicketCreateView(LoginRequiredMixin, CreateView):
-    login_url = reverse_lazy('login')
     model = Ticket
     fields = ['title', 'description', 'priority']
     template_name = 'helpdesk/ticket_create.html'
@@ -43,9 +41,8 @@ class TicketCreateView(LoginRequiredMixin, CreateView):
 
 
 class TicketUpdateView(LoginRequiredMixin, UpdateView):
-    login_url = reverse_lazy('login')
     model = Ticket
-    fields = ['description', 'priority']
+    form_class = TicketUpdateForm
     template_name = 'helpdesk/ticket_update.html'
 
     def get_success_url(self):
@@ -58,10 +55,20 @@ class TicketUpdateView(LoginRequiredMixin, UpdateView):
             return super().form_valid(form)
         return HttpResponseRedirect(self.get_success_url())
 
+    def form_invalid(self, form):
+        error_list = form.errors.get('__all__')
+        for error in error_list:
+            messages.error(self.request, error)
+        return HttpResponseRedirect(reverse_lazy('home'))
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
 
 class TicketListView(LoginRequiredMixin, ListView):
-    login_url = reverse_lazy('login')
-    model = Ticket
+    queryset = Ticket.objects.exclude(status=Ticket.RESTORED_STATUS)
     template_name = 'helpdesk/home.html'
 
     def get_context_data(self, **kwargs):
@@ -72,29 +79,17 @@ class TicketListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = super().get_queryset()
         user = self.request.user
-        if not user.is_superuser:
-            return queryset.filter(user=user).exclude(status=Ticket.REJECTED_STATUS)
-        return queryset.exclude(status=Ticket.RESTORED_STATUS)
+        if not user.is_staff:
+            return queryset.filter(user=user)
+        return queryset.exclude(status=Ticket.REJECTED_STATUS)
 
 
-class RejectTicketListView(ListView):
-    model = Ticket
-    template_name = 'helpdesk/ticket_reject.html'
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        user = self.request.user
-        return queryset.filter(user=user, status=Ticket.REJECTED_STATUS)
-
-
-class RestoreTicketListView(ListView):
-    model = Ticket
+class RestoreTicketListView(LoginRequiredMixin, ListView):
     queryset = Ticket.objects.filter(status=Ticket.RESTORED_STATUS)
     template_name = 'helpdesk/ticket_restore.html'
 
 
 class TicketDetailView(LoginRequiredMixin, DetailView):
-    login_url = reverse_lazy('login')
     model = Ticket
     template_name = 'helpdesk/ticket_detail.html'
     comment_form = CommentCreateForm
@@ -115,14 +110,15 @@ class TicketDetailView(LoginRequiredMixin, DetailView):
             self.accept_form.fields['comment'].widget = forms.HiddenInput()
             context['accept_form'] = self.accept_form
 
-            reject_form = self.reject_form
-
             if ticket_status == Ticket.ACTIVE_STATUS:
-                reject_form.fields['comment'].required = True
-                context['reject_form'] = reject_form
+                self.reject_form.fields['comment'].required = True
+                self.reject_form.fields['comment'].widget = forms.Textarea()
+                context['reject_form'] = self.reject_form
+
             elif ticket_status == Ticket.RESTORED_STATUS:
-                reject_form.fields['comment'].widget = forms.HiddenInput()
-                context['reject_form'] = reject_form
+                self.reject_form.fields['comment'].required = False
+                self.reject_form.fields['comment'].widget = forms.HiddenInput()
+                context['reject_form'] = self.reject_form
 
         if ticket_status == Ticket.PROCESSED_STATUS and user_is_admin:
             self.complete_form.fields['comment'].widget = forms.HiddenInput()
@@ -134,7 +130,6 @@ class TicketDetailView(LoginRequiredMixin, DetailView):
 
 
 class ChangeTicketStatusView(LoginRequiredMixin, UpdateView):
-    login_url = reverse_lazy('login')
     model = Ticket
     form_class = ChangeTicketStatusForm
     success_url = reverse_lazy('home')
@@ -185,18 +180,28 @@ class ChangeTicketStatusView(LoginRequiredMixin, UpdateView):
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
-    login_url = reverse_lazy('login')
     form_class = CommentCreateForm
 
     def form_valid(self, form):
         comment = form.save(commit=False)
-        ticket_id = self.kwargs.get('pk')
-        ticket = Ticket.objects.get(id=ticket_id)
-        author = self.request.user
-        comment.ticket = ticket
-        comment.author = author
+        comment.ticket = form.ticket
+        comment.author = self.request.user
         comment.save()
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        error_list = form.errors.get('__all__')
+        for error in error_list:
+            messages.error(self.request, error)
+        return HttpResponseRedirect(reverse_lazy('home'))
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        ticket_id = self.kwargs.get('pk')
+        ticket = Ticket.objects.get(id=ticket_id)
+        kwargs['ticket'] = ticket
+        kwargs['request'] = self.request
+        return kwargs
 
     def get_success_url(self):
         return reverse_lazy('detail_ticket', kwargs={'pk': self.object.ticket_id})
