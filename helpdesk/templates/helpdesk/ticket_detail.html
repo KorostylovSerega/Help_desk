@@ -5,6 +5,8 @@
     <a href="{% url 'update_ticket' ticket.id %}">Update</a>
     <br>
     {% endif %}
+    user: {{ user }}
+    <br>
     id: {{ ticket.id }}
     <br>
     title: {{ ticket.title }}
@@ -14,6 +16,8 @@
     priority: {{ ticket.get_priority_display }}
     <br>
     status: {{ ticket.get_status_display }}
+    <br>
+    author: {{ ticket.user }}
     <br>
     comments:
     {% for comment in ticket.comments.all%}

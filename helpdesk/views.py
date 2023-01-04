@@ -89,7 +89,7 @@ class RestoreTicketListView(LoginRequiredMixin, ListView):
     template_name = 'helpdesk/ticket_restore.html'
 
 
-class TicketDetailView(LoginRequiredMixin, DetailView):
+class TicketDetailView(UserPassesTestMixin, DetailView):
     model = Ticket
     template_name = 'helpdesk/ticket_detail.html'
     comment_form = CommentCreateForm
@@ -97,6 +97,11 @@ class TicketDetailView(LoginRequiredMixin, DetailView):
     reject_form = ChangeTicketStatusForm(initial={'status': Ticket.REJECTED_STATUS})
     complete_form = ChangeTicketStatusForm(initial={'status': Ticket.COMPLETED_STATUS})
     restore_form = ChangeTicketStatusForm(initial={'status': Ticket.RESTORED_STATUS})
+
+    def test_func(self):
+        ticket = self.get_object()
+        user = self.request.user
+        return ticket.user == user or user.is_staff
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
