@@ -26,11 +26,15 @@ class UserCreateView(CreateView):
         return valid
 
 
-class TicketCreateView(LoginRequiredMixin, CreateView):
+class TicketCreateView(UserPassesTestMixin, CreateView):
     model = Ticket
     fields = ['title', 'description', 'priority']
     template_name = 'helpdesk/ticket_create.html'
     success_url = reverse_lazy('home')
+
+    def test_func(self):
+        user = self.request.user
+        return user.is_authenticated and not user.is_staff
 
     def form_valid(self, form):
         ticket = form.save(commit=False)
@@ -40,10 +44,15 @@ class TicketCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class TicketUpdateView(LoginRequiredMixin, UpdateView):
+class TicketUpdateView(UserPassesTestMixin, UpdateView):
     model = Ticket
     form_class = TicketUpdateForm
     template_name = 'helpdesk/ticket_update.html'
+
+    def test_func(self):
+        ticket = self.get_object()
+        user = self.request.user
+        return ticket.user == user and ticket.status == Ticket.ACTIVE_STATUS
 
     def get_success_url(self):
         return reverse_lazy('detail_ticket', kwargs={'pk': self.object.pk})
@@ -77,9 +86,12 @@ class TicketListView(LoginRequiredMixin, ListView):
         return queryset.exclude(status=Ticket.REJECTED_STATUS)
 
 
-class RestoreTicketListView(LoginRequiredMixin, ListView):
+class RestoreTicketListView(UserPassesTestMixin, ListView):
     queryset = Ticket.objects.filter(status=Ticket.RESTORED_STATUS)
     template_name = 'helpdesk/ticket_restore.html'
+
+    def test_func(self):
+        return self.request.user.is_staff
 
 
 class TicketDetailView(UserPassesTestMixin, DetailView):
