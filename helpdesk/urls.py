@@ -1,9 +1,16 @@
 from django.contrib.auth import views
-from django.urls import path
+from django.urls import path, include
+from rest_framework import routers
 
+from helpdesk.API.resourses import TicketViewSet, CommentViewSet
 from helpdesk.views import UserCreateView, TicketCreateView, TicketUpdateView,\
     TicketListView, TicketDetailView, CommentCreateView, ChangeTicketStatusView,\
     RestoreTicketListView
+
+
+router = routers.SimpleRouter()
+router.register(r'ticket', TicketViewSet)
+router.register(r'comment', CommentViewSet)
 
 urlpatterns = [
     path('login/', views.LoginView.as_view(), name='login'),
@@ -16,4 +23,6 @@ urlpatterns = [
     path('update-ticket/<int:pk>/', TicketUpdateView.as_view(), name='update_ticket'),
     path('update-ticket-status/<int:pk>/', ChangeTicketStatusView.as_view(), name='change_status'),
     path('add-comment/<int:pk>', CommentCreateView.as_view(), name='add_comment'),
+
+    path('api/', include(router.urls)),
 ]
