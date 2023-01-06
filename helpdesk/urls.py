@@ -2,13 +2,14 @@ from django.contrib.auth import views
 from django.urls import path, include
 from rest_framework import routers
 
-from helpdesk.API.resourses import TicketViewSet, CommentViewSet
+from helpdesk.API.resourses import RegistrationViewSet, TicketViewSet, CommentViewSet
 from helpdesk.views import UserCreateView, TicketCreateView, TicketUpdateView,\
     TicketListView, TicketDetailView, CommentCreateView, ChangeTicketStatusView,\
     RestoreTicketListView
 
 
 router = routers.SimpleRouter()
+router.register(r'registration', RegistrationViewSet)
 router.register(r'ticket', TicketViewSet)
 router.register(r'comment', CommentViewSet)
 

@@ -27,6 +27,7 @@ class CounterUserAction(MiddlewareMixin):
     def process_request(self, request):
         if request.user.is_authenticated and not request.user.is_superuser:
             counter_action = request.session.get('counter_action', 0)
-            counter_action += 1
-            request.session['counter_action'] = counter_action
-            messages.info(request, f'{counter_action}')
+            if request.method == 'GET':
+                counter_action += 1
+                request.session['counter_action'] = counter_action
+                messages.info(request, f'{counter_action}')
