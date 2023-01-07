@@ -35,10 +35,10 @@ class CommentCreateForm(forms.ModelForm):
         comment_author = self.request.user
 
         if current_status != Ticket.ACTIVE_STATUS:
-            self.add_error(None, 'You cannot comment on an ticket that is not in the active status')
+            self.add_error(None, 'You cannot comment on an ticket that is not in the active status.')
 
         if ticket_author != comment_author and not comment_author.is_staff:
-            self.add_error(None, 'Only the author or administrator can leave a comment on the ticket')
+            self.add_error(None, 'Only the author or administrator can leave a comment on the ticket.')
 
 
 class TicketUpdateForm(forms.ModelForm):
@@ -58,10 +58,10 @@ class TicketUpdateForm(forms.ModelForm):
         user = self.request.user
 
         if current_status != Ticket.ACTIVE_STATUS:
-            self.add_error(None, 'You cannot edit an ticket if it is not in the Active status')
+            self.add_error(None, 'You cannot edit an ticket if it is not in the Active status.')
 
         if author != user:
-            self.add_error(None, 'You can change only your ticket')
+            self.add_error(None, 'You can change only your ticket.')
 
 
 class ChangeTicketStatusForm(forms.ModelForm):
@@ -87,23 +87,23 @@ class ChangeTicketStatusForm(forms.ModelForm):
         user_is_admin = user.is_staff
 
         if changed_status == current_status:
-            self.add_error('status', 'Status should be different')
+            self.add_error('status', 'Status should be different.')
 
         if user != author and not user_is_admin:
-            self.add_error('status', 'You can change status only your ticket')
+            self.add_error('status', 'You can change status only your ticket.')
 
         if changed_status == Ticket.ACTIVE_STATUS:
-            self.add_error('status', 'Status ACTIVE cannot be set by user')
+            self.add_error('status', 'Status ACTIVE cannot be set by user.')
 
         if changed_status in [Ticket.PROCESSED_STATUS, Ticket.REJECTED_STATUS] and \
                 current_status not in [Ticket.ACTIVE_STATUS, Ticket.RESTORED_STATUS] and \
                 not user_is_admin:
-            self.add_error('status', 'Status can only be set if the ticket is active or restored')
+            self.add_error('status', 'Status can only be set if the ticket is active or restored.')
 
         if changed_status == Ticket.RESTORED_STATUS and \
                 current_status != Ticket.REJECTED_STATUS and user_is_admin:
-            self.add_error('status', 'You can only restore an ticket if it was rejected')
+            self.add_error('status', 'You can only restore an ticket if it was rejected.')
 
         if changed_status == Ticket.COMPLETED_STATUS and \
                 current_status != Ticket.PROCESSED_STATUS and not user_is_admin:
-            self.add_error('status', 'You can complete the ticket only if it in the status PROCESSED')
+            self.add_error('status', 'You can complete the ticket only if it in the status PROCESSED.')

@@ -19,7 +19,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         if data['password'] != data['password2']:
-            raise serializers.ValidationError('The two password fields dont match')
+            raise serializers.ValidationError('The two password fields dont match.')
         return data
 
     def create(self, validated_data):
@@ -72,12 +72,12 @@ class CommentSerializer(serializers.ModelSerializer):
 
         if ticket.status != Ticket.ACTIVE_STATUS:
             raise serializers.ValidationError({
-                'ticket': 'You cannot comment on an ticket that is not in the active status'
+                'ticket': 'You cannot comment on an ticket that is not in the active status.'
             })
 
         if user != ticket.user and not user.is_staff:
             raise serializers.ValidationError({
-                'ticket': 'Only the author or administrator can leave a comment on the ticket'
+                'ticket': 'Only the author or administrator can leave a comment on the ticket.'
             })
 
         return data
@@ -107,11 +107,13 @@ class TicketUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ticket
-        fields = ['description', 'priority']
+        fields = ['id', 'title', 'description', 'priority', 'status']
+        read_only_fields = ['title', 'status']
 
     def validate(self, data):
-        pass
-# active status only
+        if self.instance.status != Ticket.ACTIVE_STATUS:
+            raise serializers.ValidationError('You cannot edit an ticket if it is not in the Active status.')
+        return data
 
 
 class ChangeTicketStatusSerializer(serializers.ModelSerializer):
@@ -119,7 +121,48 @@ class ChangeTicketStatusSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ticket
-        fields = ['status', 'comment']
+        fields = ['id', 'title', 'description', 'priority', 'status', 'comment']
+        read_only_fields = ['title', 'description', 'priority']
 
     def validate(self, data):
-        pass
+        comment = data.get('comment')
+        changed_status = data.get('status')
+        current_status = self.instance.status
+        request = self.context.get('request')
+        user_is_admin = request.user.is_staff
+
+        if changed_status is None:
+            raise serializers.ValidationError({
+                'status': 'This field is required.'
+            })
+
+        if changed_status == current_status:
+            raise serializers.ValidationError({
+                'status': 'Status should be different.'
+            })
+
+        if changed_status == Ticket.ACTIVE_STATUS:
+            raise serializers.ValidationError({
+                'status': 'Status ACTIVE cannot be set by user.'
+            })
+
+        if changed_status in [Ticket.PROCESSED_STATUS, Ticket.REJECTED_STATUS] and \
+                current_status not in [Ticket.ACTIVE_STATUS, Ticket.RESTORED_STATUS] and \
+                not user_is_admin:
+            raise serializers.ValidationError({
+                'status': 'Status can only be set if the ticket is active or restored.'
+            })
+
+        if changed_status == Ticket.RESTORED_STATUS and \
+                current_status != Ticket.REJECTED_STATUS and user_is_admin:
+            raise serializers.ValidationError({
+                'status': 'You can only restore an ticket if it was rejected.'
+            })
+
+        if changed_status == Ticket.COMPLETED_STATUS and \
+                current_status != Ticket.PROCESSED_STATUS and not user_is_admin:
+            raise serializers.ValidationError({
+                'status': 'You can complete the ticket only if it in the status PROCESSED.'
+            })
+
+        return data

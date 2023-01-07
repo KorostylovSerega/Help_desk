@@ -42,6 +42,17 @@ class ChangeTicketStatusViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.all()
     serializer_class = ChangeTicketStatusSerializer
     http_method_names = ['patch']
+    # permission_classes = []    ****post and patch only client
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        if not user.is_staff:
+            return queryset.filter(user=user)
+        return queryset
+
+    # def perform_update(self, serializer):
+    #     pass
 
 
 class CommentViewSet(viewsets.ModelViewSet):
