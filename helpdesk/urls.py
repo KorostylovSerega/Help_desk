@@ -1,8 +1,9 @@
 from django.contrib.auth import views
 from django.urls import path, include
 from rest_framework import routers
+from rest_framework.authtoken import views as rest_views
 
-from helpdesk.API.resourses import RegistrationViewSet, TicketViewSet, CommentViewSet
+from helpdesk.API.resourses import RegistrationViewSet, TicketViewSet, CommentViewSet, ChangeTicketStatusViewSet
 from helpdesk.views import UserCreateView, TicketCreateView, TicketUpdateView,\
     TicketListView, TicketDetailView, CommentCreateView, ChangeTicketStatusView,\
     RestoreTicketListView
@@ -11,6 +12,7 @@ from helpdesk.views import UserCreateView, TicketCreateView, TicketUpdateView,\
 router = routers.SimpleRouter()
 router.register(r'registration', RegistrationViewSet)
 router.register(r'ticket', TicketViewSet)
+router.register(r'change-ticket-status', ChangeTicketStatusViewSet)
 router.register(r'comment', CommentViewSet)
 
 urlpatterns = [
@@ -26,4 +28,5 @@ urlpatterns = [
     path('add-comment/<int:pk>', CommentCreateView.as_view(), name='add_comment'),
 
     path('api/', include(router.urls)),
+    path('api/get-auth-token/', rest_views.obtain_auth_token)
 ]

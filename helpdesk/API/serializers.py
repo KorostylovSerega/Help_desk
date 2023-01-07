@@ -9,7 +9,13 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'password', 'password2']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'password', 'password2', 'token']
+        extra_kwargs = {
+            'token': {
+                'source': 'auth_token',
+                'read_only': True,
+            },
+        }
 
     def validate(self, data):
         if data['password'] != data['password2']:
@@ -46,7 +52,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['id', 'comment', 'author', 'ticket', 'created']
+        fields = ['comment', 'author', 'ticket', 'created']
         extra_kwargs = {
             'comment': {
                 'source': 'body',
@@ -59,8 +65,25 @@ class CommentSerializer(serializers.ModelSerializer):
             },
         }
 
+    def validate(self, data):
+        request = self.context.get('request')
+        user = request.user
+        ticket = data.get('ticket')
 
-class TicketSerializer(serializers.ModelSerializer):
+        if ticket.status != Ticket.ACTIVE_STATUS:
+            raise serializers.ValidationError({
+                'ticket': 'You cannot comment on an ticket that is not in the active status'
+            })
+
+        if user != ticket.user and not user.is_staff:
+            raise serializers.ValidationError({
+                'ticket': 'Only the author or administrator can leave a comment on the ticket'
+            })
+
+        return data
+
+
+class TicketGetOrCreateSerializer(serializers.ModelSerializer):
     author = UserSerializer(source='user', read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
 
@@ -71,8 +94,32 @@ class TicketSerializer(serializers.ModelSerializer):
             'created': {
                 'format': '%Y-%m-%d %H:%M',
             },
+            'priority': {
+                'required': True,
+            },
+            'status': {
+                'read_only': True,
+            },
         }
 
 
+class TicketUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Ticket
+        fields = ['description', 'priority']
+
+    def validate(self, data):
+        pass
+# active status only
+
+
 class ChangeTicketStatusSerializer(serializers.ModelSerializer):
-    pass
+    comment = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Ticket
+        fields = ['status', 'comment']
+
+    def validate(self, data):
+        pass

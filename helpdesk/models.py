@@ -69,7 +69,7 @@ class Comment(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['ticket', 'created']
+        ordering = ['created']
         verbose_name = 'comment'
         verbose_name_plural = 'comments'
 
