@@ -144,38 +144,38 @@ class ChangeTicketStatusView(LoginRequiredMixin, UpdateView):
     form_class = ChangeTicketStatusForm
     success_url = reverse_lazy('home')
 
-    def form_valid(self, form):
-        ticket = Ticket.objects.get(id=self.object.pk)
-        current_status = ticket.status
-        changed_status = form.cleaned_data.get('status')
-        comment = form.cleaned_data.get('comment')
-        if changed_status in [Ticket.PROCESSED_STATUS, Ticket.COMPLETED_STATUS]:
-            return super().form_valid(form)
-        if changed_status == Ticket.RESTORED_STATUS:
-            if not comment:
-                return super().form_valid(form)
-
-            with transaction.atomic():
-                self.object.save()
-                Comment.objects.create(author=self.request.user,
-                                       ticket=self.object,
-                                       topic=Comment.RESTORE_TOPIC,
-                                       body=comment)
-            return HttpResponseRedirect(self.success_url)
-
-        if changed_status == Ticket.REJECTED_STATUS:
-            if current_status == Ticket.ACTIVE_STATUS:
-
-                with transaction.atomic():
-                    form.save()
-                    Comment.objects.create(author=self.request.user,
-                                           ticket=self.object,
-                                           topic=Comment.REJECT_TOPIC,
-                                           body=comment)
-                return HttpResponseRedirect(self.success_url)
-
-        self.object.delete()
-        return HttpResponseRedirect(self.success_url)
+    # def form_valid(self, form):
+    #     ticket = Ticket.objects.get(id=self.object.pk)
+    #     current_status = ticket.status
+    #     changed_status = form.cleaned_data.get('status')
+    #     comment = form.cleaned_data.get('comment')
+    #     if changed_status in [Ticket.PROCESSED_STATUS, Ticket.COMPLETED_STATUS]:
+    #         return super().form_valid(form)
+    #     if changed_status == Ticket.RESTORED_STATUS:
+    #         if not comment:
+    #             return super().form_valid(form)
+    #
+    #         with transaction.atomic():
+    #             form.save()
+    #             Comment.objects.create(author=self.request.user,
+    #                                    ticket=self.object,
+    #                                    topic=Comment.RESTORE_TOPIC,
+    #                                    body=comment)
+    #         return HttpResponseRedirect(self.success_url)
+    #
+    #     if changed_status == Ticket.REJECTED_STATUS:
+    #         if current_status == Ticket.ACTIVE_STATUS:
+    #
+    #             with transaction.atomic():
+    #                 form.save()
+    #                 Comment.objects.create(author=self.request.user,
+    #                                        ticket=self.object,
+    #                                        topic=Comment.REJECT_TOPIC,
+    #                                        body=comment)
+    #             return HttpResponseRedirect(self.success_url)
+    #
+    #     self.object.delete()
+    #     return HttpResponseRedirect(self.success_url)
 
     def form_invalid(self, form):
         error_list = form.errors.get('status')
