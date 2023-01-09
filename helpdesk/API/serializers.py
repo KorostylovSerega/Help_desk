@@ -146,23 +146,33 @@ class ChangeTicketStatusSerializer(serializers.ModelSerializer):
                 'status': 'Status ACTIVE cannot be set by user.'
             })
 
-        if changed_status in [Ticket.PROCESSED_STATUS, Ticket.REJECTED_STATUS] and \
-                current_status not in [Ticket.ACTIVE_STATUS, Ticket.RESTORED_STATUS] and \
-                not user_is_admin:
-            raise serializers.ValidationError({
-                'status': 'Status can only be set if the ticket is active or restored.'
-            })
+        if changed_status in [Ticket.PROCESSED_STATUS, Ticket.REJECTED_STATUS]:
+            if not user_is_admin:
+                raise serializers.ValidationError('Status can only be changed by the administrator.')
+            if current_status not in [Ticket.ACTIVE_STATUS, Ticket.RESTORED_STATUS]:
+                raise serializers.ValidationError({
+                    'status': 'Status can only be changed if the ticket is active or restored.'
+                })
+            if changed_status == Ticket.REJECTED_STATUS and \
+                    current_status == Ticket.ACTIVE_STATUS and comment is None:
+                raise serializers.ValidationError({
+                    'comment': 'This field is required.'
+                })
 
-        if changed_status == Ticket.RESTORED_STATUS and \
-                current_status != Ticket.REJECTED_STATUS and user_is_admin:
-            raise serializers.ValidationError({
-                'status': 'You can only restore an ticket if it was rejected.'
-            })
+        if changed_status == Ticket.RESTORED_STATUS:
+            if user_is_admin:
+                raise serializers.ValidationError('Administrator cant restore tickets.')
+            if current_status != Ticket.REJECTED_STATUS:
+                raise serializers.ValidationError({
+                    'status': 'You can only restore an ticket if it was rejected.'
+                })
 
-        if changed_status == Ticket.COMPLETED_STATUS and \
-                current_status != Ticket.PROCESSED_STATUS and not user_is_admin:
-            raise serializers.ValidationError({
-                'status': 'You can complete the ticket only if it in the status PROCESSED.'
-            })
+        if changed_status == Ticket.COMPLETED_STATUS:
+            if not user_is_admin:
+                raise serializers.ValidationError('Status can only be changed by the administrator.')
+            if current_status != Ticket.PROCESSED_STATUS:
+                raise serializers.ValidationError({
+                    'status': 'You can complete the ticket only if it in the status PROCESSED.'
+                })
 
         return data
