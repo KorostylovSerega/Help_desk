@@ -13,15 +13,13 @@ class RegistrationViewSet(viewsets.ModelViewSet):
 
 class TicketViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.exclude(status=Ticket.RESTORED_STATUS)
-    serializer_class = TicketGetOrCreateSerializer
-    update_serializer_class = TicketUpdateSerializer
     http_method_names = ['get', 'post', 'patch']
     # permission_classes = []    ****post and patch only client
 
     def get_serializer_class(self):
         if self.action == 'partial_update':
-            return self.update_serializer_class
-        return super().get_serializer_class()
+            return TicketUpdateSerializer
+        return TicketGetOrCreateSerializer
 
     def get_queryset(self):
         queryset = super().get_queryset()
