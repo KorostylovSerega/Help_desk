@@ -1,5 +1,5 @@
 from django.db import transaction
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 
 from helpdesk.API.serializers import RegistrationSerializer, TicketUpdateSerializer, CommentSerializer, \
     TicketGetOrCreateSerializer, ChangeTicketStatusSerializer
@@ -10,6 +10,7 @@ class RegistrationViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = RegistrationSerializer
     http_method_names = ['post']
+    permission_classes = [permissions.AllowAny]
 
 
 class TicketViewSet(viewsets.ModelViewSet):
@@ -33,16 +34,17 @@ class TicketViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class RestoreTicketViewSet(viewsets.ModelViewSet):
-    # permission_classes = []    ****only staff
-    pass
+class RestoreTicketViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Ticket.objects.filter(status=Ticket.RESTORED_STATUS)
+    serializer_class = TicketGetOrCreateSerializer
+    permission_classes = [permissions.IsAdminUser]
 
 
 class ChangeTicketStatusViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.all()
     serializer_class = ChangeTicketStatusSerializer
     http_method_names = ['patch']
-    # permission_classes = []    ****post and patch only client
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -58,36 +60,34 @@ class ChangeTicketStatusViewSet(viewsets.ModelViewSet):
         comment = serializer.validated_data.get('comment')
         user = self.request.user
 
-        if changed_status in [Ticket.PROCESSED_STATUS, Ticket.COMPLETED_STATUS]:
-            serializer.save()
-
-        elif changed_status == Ticket.RESTORED_STATUS:
-            if comment is not None:
-                with transaction.atomic():
-                    Comment.objects.create(author=user,
-                                           ticket=ticket,
-                                           topic=Comment.RESTORE_TOPIC,
-                                           body=comment)
-                    serializer.save()
-            else:
+        if changed_status == Ticket.RESTORED_STATUS and comment:
+            with transaction.atomic():
+                Comment.objects.create(author=user,
+                                       ticket=ticket,
+                                       topic=Comment.RESTORE_TOPIC,
+                                       body=comment)
                 serializer.save()
 
-        elif changed_status == Ticket.REJECTED_STATUS:
-            if current_status == Ticket.ACTIVE_STATUS:
-                with transaction.atomic():
-                    Comment.objects.create(author=user,
-                                           ticket=ticket,
-                                           topic=Comment.REJECT_TOPIC,
-                                           body=comment)
-                    serializer.save()
+        elif changed_status == Ticket.REJECTED_STATUS and current_status == Ticket.ACTIVE_STATUS:
+            with transaction.atomic():
+                Comment.objects.create(author=user,
+                                       ticket=ticket,
+                                       topic=Comment.REJECT_TOPIC,
+                                       body=comment)
+                serializer.save()
 
+        elif changed_status == Ticket.REJECTED_STATUS and current_status == Ticket.RESTORED_STATUS:
+            ticket.delete()
+
+        else:
+            return super().perform_update(serializer)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     http_method_names = ['post']
-    # permission_classes = []    ****authenticate
+    permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
