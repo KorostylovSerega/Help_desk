@@ -1,0 +1,9 @@
+{% extends 'helpdesk/base.html' %}
+{% block title %}Update ticket{% endblock %}
+{% block content %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" ><span>update</span></button>
+    </form>
+{% endblock %}

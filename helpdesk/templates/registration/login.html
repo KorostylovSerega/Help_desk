@@ -1,0 +1,13 @@
+{% extends 'helpdesk/base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+    <div class="main_form">
+    <h2>Login</h2>
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Login</button>
+    </form>
+    <a href="{% url 'register' %}">Registration</a>
+    </div>
+{% endblock %}

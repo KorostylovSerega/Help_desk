@@ -1,0 +1,73 @@
+{% extends 'helpdesk/base.html' %}
+{% block title %}Ticket detail{% endblock %}
+{% block content %}
+    {% if not user.is_staff and ticket.status == 1 %}
+    <a href="{% url 'update_ticket' ticket.id %}">Update</a>
+    <br>
+    {% endif %}
+    user: {{ user }}
+    <br>
+    id: {{ ticket.id }}
+    <br>
+    title: {{ ticket.title }}
+    <br>
+    description: {{ ticket.description }}
+    <br>
+    priority: {{ ticket.get_priority_display }}
+    <br>
+    status: {{ ticket.get_status_display }}
+    <br>
+    author: {{ ticket.user }}
+    <br>
+    comments:
+    {% for comment in ticket.comments.all%}
+        <ul>
+            <li>{{ comment.author.get_full_name }}</li>
+        <br>
+        {{ comment }}
+        <br>
+        {{ comment.created }}
+        </ul>
+    {% endfor %}
+
+    {% if comment_form %}
+    <form action="{% url 'add_comment' ticket.id %}" method="post">
+        {% csrf_token %}
+        {{ comment_form.as_p }}
+        <button type="submit" ><span>Post comment</span></button>
+    </form>
+    {% endif %}
+
+    {% if reject_form %}
+    <form action="{% url 'change_status' ticket.id %}" method="post">
+        {% csrf_token %}
+        {{ reject_form.as_p }}
+        <button type="submit" ><span>Reject</span></button>
+    </form>
+    {% endif %}
+
+    {% if accept_form %}
+    <form action="{% url 'change_status' ticket.id %}" method="post">
+        {% csrf_token %}
+        {{ accept_form.as_p }}
+        <button type="submit" ><span>Accept</span></button>
+    </form>
+    {% endif %}
+
+    {% if complete_form %}
+    <form action="{% url 'change_status' ticket.id %}" method="post">
+        {% csrf_token %}
+        {{ complete_form.as_p }}
+        <button type="submit" ><span>Completed</span></button>
+    </form>
+    {% endif %}
+
+    {% if restore_form %}
+    <form action="{% url 'change_status' ticket.id %}" method="post">
+        {% csrf_token %}
+        {{ restore_form.as_p }}
+        <button type="submit" ><span>Restore</span></button>
+    </form>
+    {% endif %}
+
+{% endblock %}
