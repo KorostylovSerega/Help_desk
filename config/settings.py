@@ -110,7 +110,8 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'helpdesk.API.authentication.CustomTokenAuthentication',
-    ]
+    ],
+    'DATETIME_FORMAT': '%d-%m-%Y %H:%M',
 }
 
 # Internationalization
