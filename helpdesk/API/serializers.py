@@ -84,31 +84,42 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class TicketGetOrCreateSerializer(serializers.ModelSerializer):
+    priority = serializers.CharField(source='get_priority_display', read_only=True)
+    status = serializers.CharField(source='get_status_display', read_only=True)
     author = UserSerializer(source='user', read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Ticket
-        fields = ['id', 'title', 'description', 'priority', 'status', 'author', 'created', 'comments']
+        fields = ['id', 'title', 'description', 'priority_id', 'priority', 'status', 'author', 'created', 'comments']
         extra_kwargs = {
             'created': {
                 'format': '%Y-%m-%d %H:%M',
             },
-            'priority': {
+            'priority_id': {
+                'source': 'priority',
+                'write_only': True,
                 'required': True,
-            },
-            'status': {
-                'read_only': True,
             },
         }
 
 
 class TicketUpdateSerializer(serializers.ModelSerializer):
+    priority = serializers.CharField(source='get_priority_display', read_only=True)
+    status = serializers.CharField(source='get_status_display', read_only=True)
 
     class Meta:
         model = Ticket
-        fields = ['id', 'title', 'description', 'priority', 'status']
-        read_only_fields = ['title', 'status']
+        fields = ['id', 'title', 'description', 'priority_id', 'priority', 'status']
+        extra_kwargs = {
+            'title': {
+                'read_only': True,
+            },
+            'priority_id': {
+                'source': 'priority',
+                'write_only': True,
+            },
+        }
 
     def validate(self, data):
         if self.instance.status != Ticket.ACTIVE_STATUS:
@@ -117,12 +128,20 @@ class TicketUpdateSerializer(serializers.ModelSerializer):
 
 
 class ChangeTicketStatusSerializer(serializers.ModelSerializer):
+    priority = serializers.CharField(source='get_priority_display', read_only=True)
+    status = serializers.CharField(source='get_status_display', read_only=True)
     comment = serializers.CharField(write_only=True)
 
     class Meta:
         model = Ticket
-        fields = ['id', 'title', 'description', 'priority', 'status', 'comment']
-        read_only_fields = ['title', 'description', 'priority']
+        fields = ['title', 'description', 'priority', 'status_id', 'status', 'comment']
+        read_only_fields = ['title', 'description']
+        extra_kwargs = {
+            'status_id': {
+                'source': 'status',
+                'write_only': True,
+            },
+        }
 
     def validate(self, data):
         comment = data.get('comment')
@@ -133,17 +152,17 @@ class ChangeTicketStatusSerializer(serializers.ModelSerializer):
 
         if changed_status is None:
             raise serializers.ValidationError({
-                'status': 'This field is required.'
+                'status_id': 'This field is required.'
             })
 
         if changed_status == current_status:
             raise serializers.ValidationError({
-                'status': 'Status should be different.'
+                'status_id': 'Status should be different.'
             })
 
         if changed_status == Ticket.ACTIVE_STATUS:
             raise serializers.ValidationError({
-                'status': 'Status ACTIVE cannot be set by user.'
+                'status_id': 'Status ACTIVE cannot be set by user.'
             })
 
         if changed_status in [Ticket.PROCESSED_STATUS, Ticket.REJECTED_STATUS]:
@@ -151,7 +170,7 @@ class ChangeTicketStatusSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('Status can only be changed by the administrator.')
             if current_status not in [Ticket.ACTIVE_STATUS, Ticket.RESTORED_STATUS]:
                 raise serializers.ValidationError({
-                    'status': 'Status can only be changed if the ticket is active or restored.'
+                    'status_id': 'Status can only be changed if the ticket is active or restored.'
                 })
             if changed_status == Ticket.REJECTED_STATUS and \
                     current_status == Ticket.ACTIVE_STATUS and comment is None:
@@ -164,7 +183,7 @@ class ChangeTicketStatusSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('Administrator cant restore tickets.')
             if current_status != Ticket.REJECTED_STATUS:
                 raise serializers.ValidationError({
-                    'status': 'You can only restore an ticket if it was rejected.'
+                    'status_id': 'You can only restore an ticket if it was rejected.'
                 })
 
         if changed_status == Ticket.COMPLETED_STATUS:
@@ -172,7 +191,7 @@ class ChangeTicketStatusSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('Status can only be changed by the administrator.')
             if current_status != Ticket.PROCESSED_STATUS:
                 raise serializers.ValidationError({
-                    'status': 'You can complete the ticket only if it in the status PROCESSED.'
+                    'status_id': 'You can complete the ticket only if it in the status PROCESSED.'
                 })
 
         return data
