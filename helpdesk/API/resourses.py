@@ -1,7 +1,8 @@
 from django.db import transaction
 from rest_framework import viewsets, permissions
 
-from helpdesk.API.serializers import RegistrationSerializer, TicketUpdateSerializer, CommentSerializer, \
+from helpdesk.API.permissions import IsUserOrAdminReadOnly
+from helpdesk.API.serializers import RegistrationSerializer, TicketUpdateSerializer, CommentSerializer,\
     TicketGetOrCreateSerializer, ChangeTicketStatusSerializer
 from helpdesk.models import CustomUser, Ticket, Comment
 
@@ -16,7 +17,7 @@ class RegistrationViewSet(viewsets.ModelViewSet):
 class TicketViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.exclude(status=Ticket.RESTORED_STATUS)
     http_method_names = ['get', 'post', 'patch']
-    # permission_classes = []    ****post and patch only client
+    permission_classes = [IsUserOrAdminReadOnly]
 
     def get_serializer_class(self):
         if self.action == 'partial_update':
@@ -41,7 +42,7 @@ class RestoreTicketViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class ChangeTicketStatusViewSet(viewsets.ModelViewSet):
-    queryset = Ticket.objects.all()
+    queryset = Ticket.objects.exclude(status=Ticket.COMPLETED_STATUS)
     serializer_class = ChangeTicketStatusSerializer
     http_method_names = ['patch']
     permission_classes = [permissions.IsAuthenticated]
