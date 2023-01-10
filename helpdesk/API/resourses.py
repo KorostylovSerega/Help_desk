@@ -81,7 +81,7 @@ class ChangeTicketStatusViewSet(viewsets.ModelViewSet):
             ticket.delete()
 
         else:
-            return super().perform_update(serializer)
+            serializer.save()
 
 
 class CommentViewSet(viewsets.ModelViewSet):
