@@ -14,7 +14,6 @@ router = routers.SimpleRouter()
 router.register(r'registration', RegistrationViewSet)
 router.register(r'ticket', TicketViewSet)
 router.register(r'restore-ticket', RestoreTicketViewSet)
-# router.register(r'change-ticket-status', ChangeTicketStatusViewSet)
 router.register(r'comment', CommentViewSet)
 
 urlpatterns = [

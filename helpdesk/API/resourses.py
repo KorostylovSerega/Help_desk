@@ -85,49 +85,6 @@ class RestoreTicketViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAdminUser]
 
 
-# class ChangeTicketStatusViewSet(viewsets.ModelViewSet):
-#     queryset = Ticket.objects.exclude(status=Ticket.COMPLETED_STATUS)
-#     serializer_class = ChangeTicketStatusSerializer
-#     http_method_names = ['patch']
-#     permission_classes = [permissions.IsAuthenticated]
-#
-#     def get_queryset(self):
-#         queryset = super().get_queryset()
-#         user = self.request.user
-#         if not user.is_staff:
-#             return queryset.filter(user=user)
-#         return queryset
-#
-#     def perform_update(self, serializer):
-#         ticket = serializer.instance
-#         current_status = ticket.status
-#         changed_status = serializer.validated_data.get('status')
-#         comment = serializer.validated_data.get('comment')
-#         user = self.request.user
-#
-#         if changed_status == Ticket.RESTORED_STATUS and comment:
-#             with transaction.atomic():
-#                 Comment.objects.create(author=user,
-#                                        ticket=ticket,
-#                                        topic=Comment.RESTORE_TOPIC,
-#                                        body=comment)
-#                 serializer.save()
-#
-#         elif changed_status == Ticket.REJECTED_STATUS and current_status == Ticket.ACTIVE_STATUS:
-#             with transaction.atomic():
-#                 Comment.objects.create(author=user,
-#                                        ticket=ticket,
-#                                        topic=Comment.REJECT_TOPIC,
-#                                        body=comment)
-#                 serializer.save()
-#
-#         elif changed_status == Ticket.REJECTED_STATUS and current_status == Ticket.RESTORED_STATUS:
-#             ticket.delete()
-#
-#         else:
-#             serializer.save()
-
-
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
