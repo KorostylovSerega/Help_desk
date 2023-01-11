@@ -1,9 +1,11 @@
 from django.db import transaction
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.response import Response
 
+from helpdesk.API.filters import StatusPriorityFilter
 from helpdesk.API.permissions import IsUserOrAdminReadOnly
 from helpdesk.API.serializers import RegistrationSerializer, TicketUpdateSerializer, CommentSerializer,\
     TicketGetOrCreateSerializer, ChangeTicketStatusSerializer
@@ -20,6 +22,9 @@ class RegistrationViewSet(viewsets.ModelViewSet):
 class TicketViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.exclude(status=Ticket.RESTORED_STATUS)
     http_method_names = ['get', 'post', 'patch']
+    filter_backends = [StatusPriorityFilter, SearchFilter, OrderingFilter]
+    search_fields = ['title']
+    ordering_fields = ['priority', 'status', 'created']
     permission_classes = [IsUserOrAdminReadOnly]
 
     def get_serializer_class(self):
@@ -82,6 +87,9 @@ class TicketViewSet(viewsets.ModelViewSet):
 class RestoreTicketViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ticket.objects.filter(status=Ticket.RESTORED_STATUS)
     serializer_class = TicketGetOrCreateSerializer
+    filter_backends = [StatusPriorityFilter, SearchFilter, OrderingFilter]
+    search_fields = ['title']
+    ordering_fields = ['priority', 'status', 'created']
     permission_classes = [IsAdminUser]
 
 
