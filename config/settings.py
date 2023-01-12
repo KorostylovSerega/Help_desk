@@ -114,6 +114,17 @@ REST_FRAMEWORK = {
     'DATETIME_FORMAT': '%d-%m-%Y %H:%M',
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
+        "KEY_PREFIX": "example"
+    }
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
@@ -137,5 +148,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 INACTIVITY_TIME_LIMIT = 60 * 60
+
+TOKEN_EXPIRATION_TIME = 60 * 60
 
 FILTERS_EMPTY_CHOICE_LABEL = 'select an option...'
