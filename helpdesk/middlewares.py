@@ -12,7 +12,7 @@ from config.settings import INACTIVITY_TIME_LIMIT
 class AutoLogout(MiddlewareMixin):
 
     def process_request(self, request):
-        if request.user.is_authenticated and not request.user.is_superuser:
+        if request.user.is_authenticated and not request.user.is_staff:
             now = datetime.now()
             last_activity_time = request.session.get('last_activity_time', now.isoformat())
             inactivity_period = now - datetime.fromisoformat(last_activity_time)
@@ -25,9 +25,8 @@ class AutoLogout(MiddlewareMixin):
 class CounterUserAction(MiddlewareMixin):
 
     def process_request(self, request):
-        if request.user.is_authenticated and not request.user.is_superuser:
+        if request.user.is_authenticated and not request.user.is_staff and request.method == 'GET':
             counter_action = request.session.get('counter_action', 0)
-            if request.method == 'GET':
-                counter_action += 1
-                request.session['counter_action'] = counter_action
-                messages.info(request, f'{counter_action}')
+            counter_action += 1
+            request.session['counter_action'] = counter_action
+            messages.info(request, f'{counter_action}')
