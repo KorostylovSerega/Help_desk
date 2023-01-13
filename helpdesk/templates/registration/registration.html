@@ -1,12 +1,13 @@
 {% extends 'helpdesk/base.html' %}
+{% load django_bootstrap5 %}
 {% block title %}Registration{% endblock %}
 {% block content %}
-    <div class="main_form">
+
+<form action="" method="post">
     <h2>Registration</h2>
-    <form action="" method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Sign up</button>
-    </form>
-    </div>
+    {% bootstrap_form form layout='vertical'%}
+    {% bootstrap_form_errors form %}
+    {% bootstrap_button "Sign up" button_type="submit" %}
+</form>
+
 {% endblock %}
