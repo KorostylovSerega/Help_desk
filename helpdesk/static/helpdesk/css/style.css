@@ -1,10 +1,108 @@
 body {
-    background: #ffff;
+    margin: 0;
+    padding: 0;
 }
 
-aside {
-    float: left;
-    background: #abc2c5;
-    width: 20%;
+.main {
+    background-image: url('../img/background.jpg');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-attachment: fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+.header {
+    background: #ce1919;
+    height: 50px;
+    width: 100%;
+    padding-left: 200px;
+    position: fixed;
+    top: 0;
+    right: 0;
+    text-align: right;
+}
+
+.side-bar {
+    background: rgba(95, 108, 108, 0.5);
+    width: 200px;
     height: 100vh;
+    position: fixed;
+    left: 0;
+    z-index: 1;
+}
+
+.content {
+    /*background: grey;*/
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    padding: 55px 0 55px 205px;
+}
+
+.footer {
+    background: aquamarine;
+    height: 50px;
+    width: 100%;
+    padding: 0 200px 0 200px;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    text-align: center;
+}
+
+.login-form, .register-form, .create-form {
+    margin-top: 100px;
+}
+
+.ticket-list {
+    display: block;
+    width: 90%;
+    height: 100px;
+    box-shadow: 0 0 5px #4c4c4f;
+    margin: 7px ;
+    text-align: center;
+}
+
+#active {
+    box-shadow: 0 0 10px #298f4f;
+}
+
+#processed {
+    box-shadow: 0 0 10px #2e6a9b;
+}
+
+#rejected {
+    box-shadow: 0 0 10px #ad3434;
+}
+
+#restored {
+    box-shadow: 0 0 10px #b69923;
+}
+
+#completed {
+    box-shadow: 0 0 10px #8797b0;
+}
+
+#status-active {
+    color: #298f4f;
+}
+
+#status-processed {
+   color: #2e6a9b;
+}
+
+#status-rejected {
+    color: #ad3434;
+}
+
+#status-restored {
+    color: #b69923;
+}
+
+#status-completed {
+    color: #8797b0;
 }

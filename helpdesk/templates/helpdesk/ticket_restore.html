@@ -1,14 +1,14 @@
 {% extends 'helpdesk/base.html' %}
 {% block title %}Restore ticket{% endblock %}
 {% block content %}
-    <ul>
+
     {% for ticket in object_list %}
-        <li>
-            <p>{{ ticket.title }}</p>
-            <p>{{ ticket.get_status_display }}</p>
+        <div class="ticket-list" id="{{ ticket.get_status_display|lower }}">
+            <h3>{{ ticket.title }}</h3>
+            <p id="status-{{ ticket.get_status_display|lower }}">{{ ticket.get_status_display }}</p>
             <p>{{ ticket.user }}</p>
             <p><a href="{% url 'detail_ticket' ticket.id %}">Detail</a></p>
-        </li>
+        </div>
     {% endfor %}
-    </ul>
+
 {% endblock %}

@@ -1,3 +1,24 @@
-<div class="sidebar">
-
+{% load django_bootstrap5 %}
+<div class="side-bar">
+    <h3>HelpDesk</h3>
+    {% if user.is_authenticated %}
+    <ul>
+        {% if not user.is_staff %}
+        <li><a href="{% url 'add_ticket' %}">Add new ticket</a></li>
+        {% elif user.is_staff %}
+        <li><a href="{% url 'restore_ticket' %}">Restored tickets</a></li>
+        {% endif %}
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'logout' %}">Sign out</a></li>
+    </ul>
+    {% if request.path == '/'%}
+        <form action="" method="get">
+{#        {% for field in filter.form %}#}
+{#        {% bootstrap_field field%}#}
+{#        {% endfor %}#}
+        {% bootstrap_form filter.form layout='vertical'%}
+        {% bootstrap_button "filter" button_type="submit" button_class="btn-success"%}
+        </form>
+    {% endif %}
+    {% endif %}
 </div>

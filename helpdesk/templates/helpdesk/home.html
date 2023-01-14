@@ -1,26 +1,13 @@
 {% extends 'helpdesk/base.html' %}
 {% block title %}Home{% endblock %}
 {% block content %}
-    {% if not user.is_staff %}
-        <a href="{% url 'add_ticket' %}">Add new ticket</a>
-    {% elif user.is_staff %}
-        <a href="{% url 'restore_ticket' %}">Restored tickets</a>
-    {% endif %}
-    <br>
-    <h3>Filter</h3>
-    <form action="" method="get">
-        {{ filter.form.as_p }}
-        <button type="submit">Filter</button>
-    </form>
-    <a href="{% url 'home' %}">Reset</a>
-    <br>
-    <ul>
+
     {% for ticket in filter.qs %}
-        <li>
-            <p>{{ ticket.title }}</p>
-            <p>{{ ticket.get_status_display }}</p>
+        <div class="ticket-list" id="{{ ticket.get_status_display|lower }}">
+            <h3>{{ ticket.title }}</h3>
+            <p id="status-{{ ticket.get_status_display|lower }}">{{ ticket.get_status_display }}</p>
             <p><a href="{% url 'detail_ticket' ticket.id %}">Detail</a></p>
-        </li>
+        </div>
     {% endfor %}
-    </ul>
+
 {% endblock %}

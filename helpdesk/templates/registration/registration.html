@@ -2,12 +2,12 @@
 {% load django_bootstrap5 %}
 {% block title %}Registration{% endblock %}
 {% block content %}
-
-<form action="" method="post">
-    <h2>Registration</h2>
-    {% bootstrap_form form layout='vertical'%}
-    {% bootstrap_form_errors form %}
-    {% bootstrap_button "Sign up" button_type="submit" %}
-</form>
-
+<div class="register-form">
+    <form action="" method="post">
+        <h2>Registration</h2>
+        {% bootstrap_form form layout='vertical'%}
+        {% bootstrap_form_errors form %}
+        {% bootstrap_button "Sign up" button_type="submit" %}
+    </form>
+</div>
 {% endblock %}
