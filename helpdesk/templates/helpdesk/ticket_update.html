@@ -1,9 +1,13 @@
 {% extends 'helpdesk/base.html' %}
+{% load django_bootstrap5 %}
 {% block title %}Update ticket{% endblock %}
 {% block content %}
+<div class="update-form">
     <form action="" method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" ><span>update</span></button>
+        <h1>Update tiket</h1>
+        {% bootstrap_form form layout='vertical'%}
+        {% bootstrap_button "Update" button_type="submit" button_class="btn-success"%}
     </form>
+</div>
 {% endblock %}

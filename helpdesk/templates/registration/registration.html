@@ -9,5 +9,8 @@
         {% bootstrap_form_errors form %}
         {% bootstrap_button "Sign up" button_type="submit" %}
     </form>
+        <p>
+            <a class="link-dark" href="{% url 'login' %}">Sign in</a>
+        </p>
 </div>
 {% endblock %}

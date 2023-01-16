@@ -3,10 +3,16 @@
 {% block content %}
 
     {% for ticket in filter.qs %}
-        <div class="ticket-list" id="{{ ticket.get_status_display|lower }}">
+        <div class="ticket-list" id="{{ ticket.get_status_display|lower }}"
+             ondblclick="document.location.href = 'http://127.0.0.1:8000/ticket/' + {{ ticket.id }}">
             <h3>{{ ticket.title }}</h3>
-            <p id="status-{{ ticket.get_status_display|lower }}">{{ ticket.get_status_display }}</p>
-            <p><a href="{% url 'detail_ticket' ticket.id %}">Detail</a></p>
+            <p class="ticket-status" id="status-{{ ticket.get_status_display|lower }}">{{ ticket.get_status_display }}</p>
+            <div class="ticket-item">
+                {% if user.is_staff %}
+                <p>Author: {{ ticket.user.get_full_name }}</p>
+                {% endif %}
+                <p>Creation date: {{ ticket.created|date:'d-M-Y H:m' }}</p>
+            </div>
         </div>
     {% endfor %}
 
