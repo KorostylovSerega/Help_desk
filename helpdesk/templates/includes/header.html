@@ -1,6 +1,7 @@
 <div class="header">
-    NAVBAR
     {% for message in messages %}
-        <p>{{ message }}</p>
+        {% if message.tags == 'info' %}
+            <p>{{ message }}</p>
+        {% endif %}
     {% endfor %}
 </div>

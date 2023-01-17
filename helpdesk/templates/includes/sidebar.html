@@ -23,9 +23,6 @@
     </ul>
     {% if request.path == '/'%}
         <form action="" method="get">
-{#        {% for field in filter.form %}#}
-{#        {% bootstrap_field field%}#}
-{#        {% endfor %}#}
         {% bootstrap_form filter.form layout='vertical'%}
         {% bootstrap_button "Filter" button_type="submit" button_class="btn-secondary"%}
         </form>

@@ -11,17 +11,6 @@ body {
     background-size: cover;
 }
 
-/*.main {*/
-/*    background-image: url('../img/background.jpg');*/
-/*    background-repeat: no-repeat;*/
-/*    background-position: center center;*/
-/*    background-attachment: fixed;*/
-/*    -webkit-background-size: cover;*/
-/*    -moz-background-size: cover;*/
-/*    -o-background-size: cover;*/
-/*    background-size: cover;*/
-/*}*/
-
 .header {
     background-image: url('../img/header.jpg');
     background-repeat: no-repeat;
@@ -32,7 +21,17 @@ body {
     position: fixed;
     top: 0;
     right: 0;
-    text-align: right;
+    text-align: center;
+}
+
+.header > p {
+    margin: 0;
+    line-height: 50px;
+    font-family: Caveat, sans-serif;
+    font-size: 32px;
+    font-weight: bold;
+    color: #eaedef;
+    text-shadow: 0 0 4px #0a0a0a;
 }
 
 .side-bar {
@@ -160,13 +159,19 @@ list-style: none;
     margin-top: 20px;
 }
 
-.ticket-list {
+.ticket-list, .error-message {
     display: block;
     width: 90%;
     height: 100px;
     margin: 10px ;
     text-align: center;
     font-family: Play, sans-serif;
+}
+
+.error-message {
+    font-size: 20px;
+    box-shadow: 0 0 10px #a43939;
+    border-radius: 10px;
 }
 
 .ticket-list > h3 {
@@ -204,7 +209,6 @@ list-style: none;
     margin: 5px 0 5px 30px;
     font-weight: bold;
     font-size: 16px;
-    box-shadow: 0 0 5px #b69923;
     border-radius: 10px;
     background: white;
     width: 100px;
@@ -244,4 +248,189 @@ list-style: none;
     margin: 5px 10px 0 10px;
     color: white;
     text-shadow: 0 0 5px #0a0a0a;
+}
+
+.ticket-detail {
+    display: flex;
+    flex-wrap: wrap;
+    width: 80%;
+    padding: 40px 30px 40px 40px;
+
+}
+
+.ticket-detail .update-button {
+    padding-top: 5px;
+    margin-right: 50px;
+    width: 200px;
+    height: 40px;
+    text-align: center;
+    background: #5f93b7;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #393c41;
+}
+
+.ticket-detail .update-button:hover {
+    background: #1b73be;
+}
+
+.ticket-detail .update-button > a {
+    text-decoration: none;
+    color: white;
+    font-family: sans-serif;
+    font-weight: normal;
+    font-size: 16px;
+}
+
+.ticket-detail > p {
+    margin-left: 30px;
+    width: 100%;
+    font-family: Play, sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 5px #0a0a0a;
+}
+
+.ticket-comments-block {
+    display: flex;
+    flex-wrap: wrap;
+    width: 65%;
+    margin: 10px 0 0 30px;
+    padding: 15px;
+    background: white;
+    box-shadow: 0 0 5px #8797b0;
+    border-radius: 15px;
+}
+
+#comment-title {
+    width: 100%;
+    margin: 15px 30px 15px 30px;
+    text-align: center;
+    font-family: Play, sans-serif;
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 5px #0a0a0a;
+}
+
+.ticket-comment {
+    display: flex;
+    flex-wrap: wrap;
+    width: 80%;
+    margin: 10px;
+    padding: 10px;
+    background: #b2daf6;
+    border-radius: 15px;
+    box-shadow: 0 0 3px #252628;
+    font-family: Play, sans-serif;
+    font-size: 18px;
+}
+
+.admin-true {
+    margin-left: 15%;
+    background: #e3e8ec;
+}
+
+.ticket-comment > p {
+    width: 100%;
+    overflow-wrap: break-word;
+
+}
+
+.ticket-comment > span {
+    margin: 10px 0 0 20px;
+    font-size: 14px;
+}
+
+.comment_form {
+    width: 65%;
+    margin-left: 30px;
+}
+
+.comment_form > form > div > label {
+    display: none;
+}
+
+.comment_form > form > div > textarea {
+    border-radius: 15px;
+    height: 70px;
+    resize: none;
+    margin-top: 5px;
+}
+
+.comment_form > form > button {
+    width: 200px;
+    height: 40px;
+    border-radius: 5px;
+}
+
+.restore_form > form > div > label {
+    display: none;
+}
+
+.reject_form > form > div > label {
+    display: none;
+}
+
+.reject_form, .restore_form, .complete_form {
+    width: 70%;
+    margin: 70px 0 10px 30px;
+}
+
+.accept_form {
+    width: 70%;
+    margin: 0 0 20px 30px;
+}
+
+.reject_form > form > div > textarea {
+    border-radius: 5px;
+    width: 200px;
+    height: 100px;
+    resize: none;
+    margin-top: 5px;
+}
+
+.restore_form > form > div > textarea {
+    border-radius: 7px;
+    width: 200px;
+    height: 100px;
+    resize: none;
+    margin-top: 5px;
+}
+
+.reject_form > form > button {
+    width: 200px;
+    height: 40px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.restore_form > form > button {
+    width: 200px;
+    height: 40px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.accept_form > form > button {
+    width: 200px;
+    height: 40px;
+    border-radius: 5px;
+}
+
+.complete_form > form > button {
+    width: 200px;
+    height: 40px;
+    border-radius: 5px;
+}
+
+.footer {
+    font-family: Caveat, sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    color: rgba(21, 20, 20, 0.64);
+}
+
+.footer > p {
+    padding-top: 12px;
 }
