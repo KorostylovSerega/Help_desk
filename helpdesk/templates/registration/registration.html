@@ -5,6 +5,7 @@
 <div class="register-form">
     <form action="" method="post">
         <h2>Registration</h2>
+        {% csrf_token %}
         {% bootstrap_form form layout='vertical'%}
         {% bootstrap_form_errors form %}
         {% bootstrap_button "Sign up" button_type="submit" %}

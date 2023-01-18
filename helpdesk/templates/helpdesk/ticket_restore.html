@@ -9,7 +9,7 @@
             <p class="ticket-status" id="status-{{ ticket.get_status_display|lower }}">{{ ticket.get_status_display }}</p>
             <div class="ticket-item">
                 <p class="ticket-item">Author: {{ ticket.user.get_full_name }}</p>
-                <p class="ticket-item">Creation date: {{ ticket.created|date:'d-M-Y H:m' }}</p>
+                <p class="ticket-item">Creation date: {{ ticket.created|date:'d-M-Y H:i' }}</p>
             </div>
         </div>
     {% endfor %}

@@ -14,7 +14,7 @@
         {% if user.is_staff %}
             <p>Author: {{ ticket.user.get_full_name }}</p>
         {% endif %}
-        <p>Creation date: {{ ticket.created|date:'d-M-Y H:m' }}</p>
+        <p>Creation date: {{ ticket.created|date:'d-M-Y H:i' }}</p>
         <p>ID: {{ ticket.id }}</p>
 
         {% if ticket.comments.all %}
@@ -24,7 +24,7 @@
                 <div class="ticket-comment admin-{{ comment.author.is_staff|lower }}">
                     <p>{{ comment }}</p>
                     <span>{{ comment.author.get_full_name }}</span>
-                    <span>{{ comment.created|date:'d-M-Y H:m' }}</span>
+                    <span>{{ comment.created|date:'d-M-Y H:i' }}</span>
                 </div>
             {% endfor %}
         </div>
