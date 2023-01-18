@@ -21,11 +21,19 @@
         <div class="ticket-comments-block">
             <p id="comment-title">Comments</p>
             {% for comment in ticket.comments.all%}
-                <div class="ticket-comment admin-{{ comment.author.is_staff|lower }}">
-                    <p>{{ comment }}</p>
-                    <span>{{ comment.author.get_full_name }}</span>
-                    <span>{{ comment.created|date:'d-M-Y H:i' }}</span>
-                </div>
+                {% if comment.topic == 1 %}
+                    <div class="ticket-comment admin-{{ comment.author.is_staff|lower }}">
+                        <p>{{ comment }}</p>
+                        <span>{{ comment.author.get_full_name }}</span>
+                        <span>{{ comment.created|date:'d-M-Y H:i' }}</span>
+                    </div>
+                {% else %}
+                    <div class="ticket-comment comment-{{ comment.get_topic_display|lower }}">
+                        <p id="topic-name">{{ comment.get_topic_display|upper }}</p>
+                        <p>{{ comment }}</p>
+                        <span>{{ comment.created|date:'d-M-Y H:i' }}</span>
+                    </div>
+                {% endif %}
             {% endfor %}
         </div>
         {% endif %}
