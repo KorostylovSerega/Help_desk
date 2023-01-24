@@ -49,10 +49,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
+    topic = serializers.CharField(source='get_topic_display', read_only=True)
 
     class Meta:
         model = Comment
-        fields = ['comment', 'author', 'ticket', 'created']
+        fields = ['topic', 'comment', 'author', 'ticket', 'created']
         extra_kwargs = {
             'comment': {
                 'source': 'body',

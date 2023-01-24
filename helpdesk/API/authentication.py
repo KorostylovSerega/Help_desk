@@ -18,14 +18,16 @@ class CustomTokenAuthentication(TokenAuthentication):
         if not token.user.is_active:
             raise AuthenticationFailed('User inactive or deleted.')
 
-        time_now = timezone.now()
-        last_activity_time = cache.get(key, time_now)
-        inactivity_period = time_now - last_activity_time
+        if not token.user.is_staff:
+            time_now = timezone.now()
+            last_activity_time = cache.get(key, time_now)
+            inactivity_period = time_now - last_activity_time
 
-        if inactivity_period.seconds > TOKEN_EXPIRATION_TIME:
-            token.delete()
-            cache.delete(key)
-            raise AuthenticationFailed('Token has expired.')
+            if inactivity_period.seconds > TOKEN_EXPIRATION_TIME:
+                token.delete()
+                cache.delete(key)
+                raise AuthenticationFailed('Token has expired.')
 
-        cache.set(key, time_now)
+            cache.set(key, time_now)
+
         return token.user, token
