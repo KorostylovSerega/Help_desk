@@ -1,73 +1,97 @@
 {% extends 'helpdesk/base.html' %}
+{% load django_bootstrap5 %}
 {% block title %}Ticket detail{% endblock %}
 {% block content %}
-    {% if not user.is_staff and ticket.status == 1 %}
-    <a href="{% url 'update_ticket' ticket.id %}">Update</a>
-    <br>
-    {% endif %}
-    user: {{ user }}
-    <br>
-    id: {{ ticket.id }}
-    <br>
-    title: {{ ticket.title }}
-    <br>
-    description: {{ ticket.description }}
-    <br>
-    priority: {{ ticket.get_priority_display }}
-    <br>
-    status: {{ ticket.get_status_display }}
-    <br>
-    author: {{ ticket.user }}
-    <br>
-    comments:
-    {% for comment in ticket.comments.all%}
-        <ul>
-            <li>{{ comment.author.get_full_name }}</li>
-        <br>
-        {{ comment }}
-        <br>
-        {{ comment.created }}
-        </ul>
-    {% endfor %}
+    <div class="ticket-detail" id="{{ ticket.get_status_display|lower }}">
+        {% if not user.is_staff and ticket.status == 1 %}
+            <p class="update-button"><a href="{% url 'update_ticket' ticket.id %}">Update</a></p>
+        {% endif %}
 
-    {% if comment_form %}
-    <form action="{% url 'add_comment' ticket.id %}" method="post">
-        {% csrf_token %}
-        {{ comment_form.as_p }}
-        <button type="submit" ><span>Post comment</span></button>
-    </form>
-    {% endif %}
+        <p>Title: {{ ticket.title }}</p>
+        <p>Description: {{ ticket.description }}</p>
+        <p>Priority: {{ ticket.get_priority_display }}</p>
+        <p>Status: {{ ticket.get_status_display }}</p>
+        {% if user.is_staff %}
+            <p>Author: {{ ticket.user.get_full_name }}</p>
+        {% endif %}
+        <p>Creation date: {{ ticket.created|date:'d-M-Y H:i' }}</p>
+        <p>ID: {{ ticket.id }}</p>
 
-    {% if reject_form %}
-    <form action="{% url 'change_status' ticket.id %}" method="post">
-        {% csrf_token %}
-        {{ reject_form.as_p }}
-        <button type="submit" ><span>Reject</span></button>
-    </form>
-    {% endif %}
+        {% if ticket.comments.all %}
+        <div class="ticket-comments-block">
+            <p id="comment-title">Comments</p>
+            {% for comment in ticket.comments.all%}
+                {% if comment.topic == 1 %}
+                    <div class="ticket-comment admin-{{ comment.author.is_staff|lower }}">
+                        <p>{{ comment }}</p>
+                        <span>{{ comment.author.get_full_name }}</span>
+                        <span>{{ comment.created|date:'d-M-Y H:i' }}</span>
+                    </div>
+                {% else %}
+                    <div class="ticket-comment comment-{{ comment.get_topic_display|lower }}">
+                        <p id="topic-name">{{ comment.get_topic_display|upper }}</p>
+                        <p>{{ comment }}</p>
+                        <span>{{ comment.created|date:'d-M-Y H:i' }}</span>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
 
-    {% if accept_form %}
-    <form action="{% url 'change_status' ticket.id %}" method="post">
-        {% csrf_token %}
-        {{ accept_form.as_p }}
-        <button type="submit" ><span>Accept</span></button>
-    </form>
-    {% endif %}
+        {% if comment_form %}
+            <div class="comment_form">
+                <form action="{% url 'add_comment' ticket.id %}" method="post">
+                {% csrf_token %}
+                {% for field in comment_form %}
+                    {% bootstrap_field field placeholder='leave a comment here...' %}
+                {% endfor %}
+                {% bootstrap_button "Post comment" button_type="submit" button_class="btn-secondary" %}
+                </form>
+            </div>
+        {% endif %}
 
-    {% if complete_form %}
-    <form action="{% url 'change_status' ticket.id %}" method="post">
-        {% csrf_token %}
-        {{ complete_form.as_p }}
-        <button type="submit" ><span>Completed</span></button>
-    </form>
-    {% endif %}
+        {% if reject_form %}
+            <div class="reject_form">
+                <form action="{% url 'change_status' ticket.id %}" method="post">
+                {% csrf_token %}
+                {% for field in reject_form %}
+                    {% bootstrap_field field placeholder='enter the reason for rejection here...' %}
+                {% endfor %}
+                {% bootstrap_button "Reject" button_type="submit" button_class="btn-danger" %}
+                </form>
+            </div>
+        {% endif %}
 
-    {% if restore_form %}
-    <form action="{% url 'change_status' ticket.id %}" method="post">
-        {% csrf_token %}
-        {{ restore_form.as_p }}
-        <button type="submit" ><span>Restore</span></button>
-    </form>
-    {% endif %}
+        {% if accept_form %}
+            <div class="accept_form">
+                <form action="{% url 'change_status' ticket.id %}" method="post">
+                {% csrf_token %}
+                {% bootstrap_form accept_form %}
+                {% bootstrap_button "Accept" button_type="submit" button_class="btn-success"%}
+                </form>
+            </div>
+        {% endif %}
 
+        {% if complete_form %}
+            <div class="complete_form">
+                <form action="{% url 'change_status' ticket.id %}" method="post">
+                {% csrf_token %}
+                {% bootstrap_form complete_form %}
+                {% bootstrap_button "Complete" button_type="submit" button_class="btn-primary"%}
+                </form>
+            </div>
+        {% endif %}
+
+        {% if restore_form %}
+            <div class="restore_form">
+                <form action="{% url 'change_status' ticket.id %}" method="post">
+                {% csrf_token %}
+                {% for field in restore_form %}
+                    {% bootstrap_field field placeholder='enter a comment on re-applying here...' %}
+                {% endfor %}
+                {% bootstrap_button "Restore" button_type="submit" button_class="btn-success"%}
+                </form>
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}

@@ -1,0 +1,7 @@
+<div class="header">
+    {% for message in messages %}
+        {% if message.tags == 'info' %}
+            <p>{{ message }}</p>
+        {% endif %}
+    {% endfor %}
+</div>

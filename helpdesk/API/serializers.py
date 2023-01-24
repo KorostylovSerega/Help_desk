@@ -60,9 +60,6 @@ class CommentSerializer(serializers.ModelSerializer):
             'ticket': {
                 'write_only': True,
             },
-            'created': {
-                'format': '%Y-%m-%d %H:%M',
-            },
         }
 
     def validate(self, data):
@@ -93,9 +90,6 @@ class TicketGetOrCreateSerializer(serializers.ModelSerializer):
         model = Ticket
         fields = ['id', 'title', 'description', 'priority_id', 'priority', 'status', 'author', 'created', 'comments']
         extra_kwargs = {
-            'created': {
-                'format': '%Y-%m-%d %H:%M',
-            },
             'priority_id': {
                 'source': 'priority',
                 'write_only': True,

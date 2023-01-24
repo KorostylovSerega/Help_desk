@@ -2,25 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-{#    {% load static %}#}
-{#    <link rel="stylesheet" href="{% static 'store/css/style.css' %}">#}
+    {% load django_bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'helpdesk/css/style.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Caveat&family=Play:wght@400;700&display=swap" rel="stylesheet">
     <title>{% block title %}{% endblock %}</title>
 </head>
-<body>
-    {% for message in messages %}
-        <p>{{ message }}</p>
-    {% endfor %}
 
-{#    {% include 'includes/navigation.html' %}#}
+<body>
     <div class="main">
-{#        {% include 'includes/messages.html' %}#}
-        {% block content %}
-        {% endblock %}
+        {% include 'includes/header.html' %}
+        {% include 'includes/sidebar.html' %}
+        <div class="content">
+            {% block content %}
+            {% endblock %}
+        </div>
+        {% include 'includes/footer.html' %}
     </div>
-    <a href="{% url 'home' %}">Home</a>
-    <a href="{% url 'login' %}">Login</a>
-    <a href="{% url 'logout' %}">Logout</a>
-    <a href="{% url 'register' %}">Registration</a>
+
 </body>
 </html>

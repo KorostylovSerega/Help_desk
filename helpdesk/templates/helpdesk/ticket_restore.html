@@ -1,14 +1,17 @@
 {% extends 'helpdesk/base.html' %}
 {% block title %}Restore ticket{% endblock %}
 {% block content %}
-    <ul>
+
     {% for ticket in object_list %}
-        <li>
-            <p>{{ ticket.title }}</p>
-            <p>{{ ticket.get_status_display }}</p>
-            <p>{{ ticket.user }}</p>
-            <p><a href="{% url 'detail_ticket' ticket.id %}">Detail</a></p>
-        </li>
+        <div class="ticket-list" id="{{ ticket.get_status_display|lower }}"
+             ondblclick="document.location.href = 'http://127.0.0.1:8000/ticket/' + {{ ticket.id }}">
+            <h3>{{ ticket.title }}</h3>
+            <p class="ticket-status" id="status-{{ ticket.get_status_display|lower }}">{{ ticket.get_status_display }}</p>
+            <div class="ticket-item">
+                <p class="ticket-item">Author: {{ ticket.user.get_full_name }}</p>
+                <p class="ticket-item">Creation date: {{ ticket.created|date:'d-M-Y H:i' }}</p>
+            </div>
+        </div>
     {% endfor %}
-    </ul>
+
 {% endblock %}

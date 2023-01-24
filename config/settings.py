@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_bootstrap5',
     'helpdesk.apps.HelpdeskConfig',
 ]
 
@@ -110,7 +111,19 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'helpdesk.API.authentication.CustomTokenAuthentication',
-    ]
+    ],
+    'DATETIME_FORMAT': '%d-%m-%Y %H:%M',
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
+        "KEY_PREFIX": "example"
+    }
 }
 
 # Internationalization
@@ -136,5 +149,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 INACTIVITY_TIME_LIMIT = 60 * 60
+
+TOKEN_EXPIRATION_TIME = 60 * 60
 
 FILTERS_EMPTY_CHOICE_LABEL = 'select an option...'

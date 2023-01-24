@@ -4,7 +4,7 @@ from rest_framework import routers
 from rest_framework.authtoken import views as rest_views
 
 from helpdesk.API.resourses import RegistrationViewSet, TicketViewSet, CommentViewSet,\
-    ChangeTicketStatusViewSet, RestoreTicketViewSet
+    RestoreTicketViewSet
 from helpdesk.views import UserCreateView, TicketCreateView, TicketUpdateView,\
     TicketListView, TicketDetailView, CommentCreateView, ChangeTicketStatusView,\
     RestoreTicketListView
@@ -14,7 +14,6 @@ router = routers.SimpleRouter()
 router.register(r'registration', RegistrationViewSet)
 router.register(r'ticket', TicketViewSet)
 router.register(r'restore-ticket', RestoreTicketViewSet)
-router.register(r'change-ticket-status', ChangeTicketStatusViewSet)
 router.register(r'comment', CommentViewSet)
 
 urlpatterns = [
